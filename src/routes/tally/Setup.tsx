@@ -4,17 +4,13 @@ import { Icon } from '../../components/Icon'
 import { PlayerNames } from '../../components/PlayerNames'
 import { Surface } from '../../components/Surface'
 import { TopBar } from '../../components/TopBar'
-import type { TallyVariant, WinnerIs } from '../../games/tally/rules'
+import type { TallyVariant } from '../../games/tally/rules'
 import { useTally } from '../../games/tally/useTally'
 import { GAME_NAMES } from '../../lib/history'
-
-const TARGETS = [50, 100, 150, 200]
 
 export function TallySetup({ variant }: { variant: TallyVariant }) {
   const { game, preset, start } = useTally(variant)
   const [names, setNames] = useState<string[]>(['', ''])
-  const [target, setTarget] = useState<number | null>(preset.target)
-  const [winnerIs, setWinnerIs] = useState<WinnerIs>(preset.winnerIs)
   const navigate = useNavigate()
 
   const filled = names.map((n) => n.trim()).filter(Boolean)
@@ -46,50 +42,10 @@ export function TallySetup({ variant }: { variant: TallyVariant }) {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card__frame" />
-          <div className="card__body">
-            <div className="field-label">SE JUEGA A</div>
-            <div className="pill-row">
-              {TARGETS.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={`pill${target === value ? ' pill--on' : ''}`}
-                  onClick={() => setTarget(value)}
-                >
-                  {value}
-                </button>
-              ))}
-              <button
-                type="button"
-                className={`pill${target === null ? ' pill--on' : ''}`}
-                onClick={() => setTarget(null)}
-              >
-                Libre
-              </button>
-            </div>
-
-            <div className="field-label">GANA EL QUE</div>
-            <div className="pill-row">
-              <button
-                type="button"
-                className={`pill pill--wide${winnerIs === 'lowest' ? ' pill--on' : ''}`}
-                onClick={() => setWinnerIs('lowest')}
-              >
-                Menos suma
-              </button>
-              <button
-                type="button"
-                className={`pill pill--wide${winnerIs === 'highest' ? ' pill--on' : ''}`}
-                onClick={() => setWinnerIs('highest')}
-              >
-                Más suma
-              </button>
-            </div>
-
-            <p className="field-note">{preset.note}</p>
-          </div>
+        {/* The rules are fixed, so they are stated rather than chosen. */}
+        <div className="rules-note">
+          <Icon name="scroll" size={17} />
+          <p>{preset.note}</p>
         </div>
       </div>
 
@@ -98,7 +54,7 @@ export function TallySetup({ variant }: { variant: TallyVariant }) {
         className="big-btn"
         disabled={!canStart}
         onClick={() => {
-          start(filled, target, winnerIs)
+          start(filled)
           navigate(`/${variant}/partida`)
         }}
       >

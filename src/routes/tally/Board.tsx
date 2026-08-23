@@ -109,6 +109,7 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
 
       {editing !== null && (
         <RoundSheet
+          variant={variant}
           players={game.players}
           roundIndex={editing === 'new' ? game.rounds.length : editing}
           initial={editing === 'new' ? null : game.rounds[editing]}

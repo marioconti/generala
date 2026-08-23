@@ -8,7 +8,6 @@ import {
   winnerNames,
   type TallyGame,
   type TallyVariant,
-  type WinnerIs,
 } from './rules'
 
 function isTally(value: unknown): boolean {
@@ -26,13 +25,14 @@ export function useTally(variant: TallyVariant) {
   const store = stores[variant]
   const game = useStore(store)
 
-  const start = (names: string[], target: number | null, winnerIs: WinnerIs) => {
+  const start = (names: string[]) => {
+    const preset = PRESETS[variant]
     store.set({
       variant,
       players: names.map((name, i) => ({ id: makeId('p'), name: name.trim(), chip: i })),
       rounds: [],
-      target,
-      winnerIs,
+      target: preset.target,
+      winnerIs: preset.winnerIs,
       startedAt: new Date().toISOString(),
       finishedAt: null,
     })
@@ -85,9 +85,6 @@ export function useTally(variant: TallyVariant) {
       players: current.players.map((p) => (p.id === id ? { ...p, name: name.trim() } : p)),
     }))
 
-  const setRules = (target: number | null, winnerIs: WinnerIs) =>
-    store.update((current) => settle({ ...current, target, winnerIs, finishedAt: null }))
-
   /** Same players, blank sheet. */
   const rematch = () =>
     store.update((current) => ({
@@ -107,7 +104,6 @@ export function useTally(variant: TallyVariant) {
     editRound,
     removeRound,
     renamePlayer,
-    setRules,
     rematch,
     reset,
   }

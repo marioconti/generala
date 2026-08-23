@@ -3,9 +3,10 @@ import { Chip } from '../../components/Chip'
 import { Icon } from '../../components/Icon'
 import { Keypad } from '../../components/Keypad'
 import { Sheet } from '../../components/Sheet'
-import type { TallyPlayer } from '../../games/tally/rules'
+import { CHINCHON_CLOSE, type TallyPlayer, type TallyVariant } from '../../games/tally/rules'
 
 interface Props {
+  variant: TallyVariant
   players: TallyPlayer[]
   /** 0-based; only used for the title. */
   roundIndex: number
@@ -16,7 +17,7 @@ interface Props {
   onClose: () => void
 }
 
-export function RoundSheet({ players, roundIndex, initial, onSave, onDelete, onClose }: Props) {
+export function RoundSheet({ variant, players, roundIndex, initial, onSave, onDelete, onClose }: Props) {
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       players.map((p) => [p.id, initial?.[p.id] !== undefined ? String(initial[p.id]) : '']),
@@ -75,6 +76,19 @@ export function RoundSheet({ players, roundIndex, initial, onSave, onDelete, onC
             </button>
           ))}
         </div>
+
+        {variant === 'chinchon' && (
+          <button
+            type="button"
+            className="close-hand"
+            onClick={() =>
+              setValues((current) => ({ ...current, [active]: String(CHINCHON_CLOSE) }))
+            }
+          >
+            <span>CORTÓ LA MANO</span>
+            <strong>{CHINCHON_CLOSE}</strong>
+          </button>
+        )}
 
         <Keypad
           value={values[active] ?? ''}

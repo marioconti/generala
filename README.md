@@ -21,12 +21,16 @@ tag, and rewriting a sticker to rename a repo is a bad trade.
 |---|---|---|
 | **Generala** | 11 fixed categories, per-player sheet | Every cell is filled |
 | **Truco** | Tally marks, two teams, malas and buenas | Someone reaches 30 |
-| **Rummy** | Hand by hand, running total | Someone crosses the target |
-| **Chinchón** | Same engine as Rummy | Someone reaches 100 |
+| **Rummy** | Hand by hand, running total | Someone crosses 100 |
+| **Chinchón** | Same engine; closing a hand scores −10 | Someone crosses 100 |
 
-Rummy and Chinchón are one engine with two knobs — the target and whether the highest or
-lowest total wins — because that is genuinely all that separates them, and because house
-rules vary more than any website admits. Both are editable at setup.
+Rummy and Chinchón are one engine. Both run to 100 and the **lowest** total wins —
+crossing 100 ends the game and the player who crossed it has lost. The only thing
+Chinchón adds is that whoever closes the hand writes **−10**, which the round sheet offers
+as a single tap.
+
+Neither is configurable. These are the house rules as played at this table; guessing at
+"flexible defaults" only produced settings nobody wanted to touch.
 
 ### Scoring, with sources
 
@@ -40,9 +44,9 @@ play continues rather than winning outright, and Doble Generala is played.
 "las buenas". Marks go in groups of five — four strokes crossed by a diagonal.
 [Reglamento](https://trucogame.com/pages/reglamento-de-truco-argentino)
 
-**Chinchón** (verified 2026-08-23): played to 100, and the **lowest** total wins —
-reaching the limit ends the game. Closing with no cards left subtracts 10, so negative
-hands are normal and the keypad has a sign key.
+**Rummy and Chinchón**: both to 100, lowest total wins, and in Chinchón closing the hand
+scores −10 — house rules, confirmed 2026-08-23. Negative hands are normal, which is why
+the keypad carries a sign key. The published Chinchón rules agree:
 [Ludoteka](https://www.ludoteka.com/games/chinchon/rules)
 
 ## Design
@@ -63,6 +67,11 @@ that width the die pips carry the row label on their own.
 Nothing is typed where a tap will do. Generala's number rows ask how many dice showed
 that face and multiply. Rummy uses a keypad drawn in the page rather than the phone's own,
 which would slide over the sheet on every hand.
+
+**Truco is scored by dragging.** Sweep up over a team's column and marks appear under your
+finger, sweep back down and they rub out; a badge tracks the running count and the whole
+gesture commits on release, so overshooting costs nothing. A tap scores one. Undo takes
+back the entire gesture rather than one mark, which is what you meant by it.
 
 ## The championship
 

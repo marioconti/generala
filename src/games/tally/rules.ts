@@ -8,14 +8,14 @@ import type { GameId } from '../../lib/history'
  * target. The only things that differ are the target and whether the highest
  * or the lowest total wins — so both are the same engine with different knobs.
  *
- * Chinchón defaults (verified 2026-08-23):
- *   played to 100, and the LOWEST total wins — reaching the limit ends it.
- *   Closing with no cards left subtracts 10, so negative hands are normal.
- *   https://www.ludoteka.com/games/chinchon/rules
+ * Both are played to 100 and the LOWEST total wins: crossing 100 ends the game
+ * and the player who crossed it has lost. In Chinchón the player who closes the
+ * hand subtracts 10, so negative hands are normal and the keypad keeps a sign
+ * key.
  *
- * Rummy has too many house variants to pin down, so it opens with the same
- * shape and both knobs are editable at setup. Whatever Mario and Juan play at
- * their table beats whatever a website says.
+ * These are the house rules as played at this table, and they are fixed rather
+ * than configurable — asked and answered, 2026-08-23. The published Chinchón
+ * rules agree: https://www.ludoteka.com/games/chinchon/rules
  */
 
 export type TallyVariant = Extract<GameId, 'rummy' | 'chinchon'>
@@ -54,15 +54,18 @@ export const PRESETS: Record<TallyVariant, VariantPreset> = {
     label: 'Chinchón',
     target: 100,
     winnerIs: 'lowest',
-    note: 'Se juega a 100. El que llega, pierde: gana el que menos suma.',
+    note: 'Se juega a 100. El que pasa, pierde: gana el que menos suma. El que corta la mano resta 10.',
   },
   rummy: {
     label: 'Rummy',
     target: 100,
     winnerIs: 'lowest',
-    note: 'Ajustá el objetivo y quién gana según cómo lo juegan ustedes.',
+    note: 'Se juega a 100. El que pasa, pierde: gana el que menos suma.',
   },
 }
+
+/** What the winner of a Chinchón hand writes down. */
+export const CHINCHON_CLOSE = -10
 
 /** Running total for one player up to and including `upTo` (default: all). */
 export function totalAt(game: TallyGame, playerId: string, upTo?: number): number {

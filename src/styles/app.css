@@ -1020,11 +1020,47 @@ a {
 }
 
 .truco-col {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 6px 8px;
+  padding: 12px 6px 10px;
   min-width: 0;
+  touch-action: none;
+  cursor: ns-resize;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: var(--r-md);
+  transition: background 120ms ease-out;
+}
+
+.truco-col--dragging {
+  background: rgba(179, 87, 63, 0.09);
+}
+
+.truco-col:focus-visible {
+  outline: 2px solid var(--accent-deep);
+  outline-offset: -3px;
+}
+
+/* Rides along with the finger so the count is where you are looking. */
+.drag-badge {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 7px 15px;
+  border-radius: var(--r-pill);
+  background: #5f8a58;
+  color: var(--paper-lit);
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 20px;
+  box-shadow: 0 5px 14px rgba(40, 26, 14, 0.34);
+  pointer-events: none;
+}
+
+.drag-badge--down {
+  background: var(--red);
 }
 
 .truco-col:first-child {
@@ -1073,7 +1109,8 @@ a {
 
 .truco-col__score {
   font-family: var(--display);
-  font-size: 34px;
+  font-weight: 600;
+  font-size: 40px;
   line-height: 1;
   color: var(--red);
   margin-top: 6px;
@@ -1092,59 +1129,11 @@ a {
   flex-shrink: 0;
 }
 
-.truco-pads {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.truco-pad {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.truco-pad__who {
-  font-size: 8px;
-  letter-spacing: 1.4px;
-  font-weight: 700;
-  color: rgba(240, 232, 213, 0.55);
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.truco-pad__keys {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 5px;
-}
-
-.truco-key {
-  min-height: 48px;
-  border-radius: var(--r-sm);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.09);
-  color: var(--paper);
-  font-size: 15px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.truco-key:active {
-  background: var(--accent);
-  color: var(--accent-ink);
-  transform: scale(0.94);
-}
-
 .truco-note {
   flex-shrink: 0;
   margin: 0;
   text-align: center;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 1.2px;
   color: rgba(240, 232, 213, 0.45);
 }
@@ -2080,4 +2069,54 @@ a {
   .splash__bar span {
     animation: none;
   }
+}
+
+/* --------------------------------------------------- fixed-rule notice */
+/* Rummy and Chinchón have no settings, so the rule is stated, not chosen. */
+
+.rules-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  flex-shrink: 0;
+  padding: 14px 17px;
+  border-radius: var(--r-lg);
+  background: rgba(28, 18, 8, 0.24);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  color: var(--accent);
+}
+
+.rules-note p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: rgba(250, 244, 232, 0.84);
+}
+
+/* One tap for the Chinchón hand that closes: the winner writes -10. */
+.close-hand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  min-height: 54px;
+  border-radius: var(--r-md);
+  border: 1.5px dashed var(--accent-deep);
+  background: rgba(226, 176, 84, 0.16);
+  font-size: 11.5px;
+  letter-spacing: 1.6px;
+  font-weight: 700;
+  color: #8a6a2e;
+}
+
+.close-hand strong {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0;
+  color: var(--red);
+}
+
+.close-hand:active {
+  background: rgba(226, 176, 84, 0.3);
 }
