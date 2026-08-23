@@ -1,0 +1,35 @@
+:root {
+  /* The table: a casino felt lit from above. */
+  --felt-deep: #06251a;
+  --felt-dark: #0d4229;
+  --felt: #14603d;
+  --felt-lit: #1d7a4f;
+
+  /* The sheet: cream paper with a notebook's blue rules and red margin. */
+  --paper: #f2e8d5;
+  --paper-lit: #fbf6ea;
+  --paper-edge: #e0d4bd;
+  --rule: #cfd9e4;
+  --rule-soft: #e3dac6;
+  --red: #b9483f;
+
+  /* Ink. Scores are written in blue, totals in red — as on paper. */
+  --ink: #1d3557;
+  --ink-soft: #5d6f85;
+  --ink-faint: #a08d68;
+  --ink-ghost: #cdbb98;
+
+  /* Gold marks whose turn it is, and the winner. */
+  --gold: #e8c877;
+  --gold-deep: #c99e46;
+  --gold-ink: #8a6f3e;
+
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display: 'Abril Fatface', Georgia, 'Times New Roman', serif;
+
+  /* Overridden per player count so the sheet never needs to scroll. */
+  --cat-w: 96px;
+  --cell-size: 20px;
+  --name-size: 11px;
+  --chip-size: 30px;
+}
