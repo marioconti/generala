@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
-import { categoryById, hasServedBonus, scoreOf } from '../game/rules'
-import type { CategoryId, Game, Score } from '../game/types'
-import { Chip } from './Chip'
-import { Die } from './Die'
+import { categoryById, hasServedBonus, scoreOf } from './rules'
+import type { CategoryId, Game, Score } from './types'
+import { Chip } from '../../components/Chip'
+import { Die } from '../../components/Die'
 
 interface Props {
   game: Game
   playerId: string
   categoryId: CategoryId
   onConfirm: (score: Score) => void
+  /** Empties the cell. Only offered when it already holds a score. */
+  onClear: () => void
   onClose: () => void
 }
 
@@ -29,8 +31,11 @@ function ScratchButton({ onClick }: { onClick: () => void }) {
  * For number rows you never type: you tap how many dice showed that face and
  * the app multiplies. For combinations you tap made / served / scratched.
  */
-export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClose }: Props) {
-  const [count, setCount] = useState<number | null>(null)
+export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClear, onClose }: Props) {
+  const existing = scoreOf(game, playerId, categoryId)
+  const [count, setCount] = useState<number | null>(
+    existing?.kind === 'number' ? existing.count : null,
+  )
   const category = categoryById(categoryId)
   const player = game.players.find((p) => p.id === playerId)
 
@@ -67,6 +72,15 @@ export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClose }: P
         </div>
 
         {warnDouble && <div className="entry__note">Ojo: todavía no anotaste Generala.</div>}
+
+        {existing && (
+          <button type="button" className="entry__clear" onClick={onClear}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+            </svg>
+            Vaciar esta casilla
+          </button>
+        )}
 
         {category.kind === 'number' ? (
           <>

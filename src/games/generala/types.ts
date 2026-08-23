@@ -59,4 +59,6 @@ export interface Game {
   finishedAt: string | null
   /** Every cell filled, newest last. Drives undo. */
   history: { playerId: string; categoryId: CategoryId }[]
+  /** Id of this game's entry in the history, once it has been recorded. */
+  recordId?: string
 }

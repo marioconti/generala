@@ -35,15 +35,7 @@ export const CATEGORIES: Category[] = [
 /** The first special row — the sheet draws a heavier rule above it. */
 export const FIRST_SPECIAL: CategoryId = 'straight'
 
-/** Poker chip colours, in the order players are handed one. */
-export const CHIPS = [
-  { fill: '#b03a3a', name: 'rojo' },
-  { fill: '#2f5d8a', name: 'azul' },
-  { fill: '#33383d', name: 'negro' },
-  { fill: '#3d7a55', name: 'verde' },
-  { fill: '#6b4a86', name: 'violeta' },
-  { fill: '#c06b2a', name: 'naranja' },
-]
+export { CHIPS } from '../../lib/chips' 
 
 export function categoryById(id: CategoryId): Category {
   const found = CATEGORIES.find((c) => c.id === id)

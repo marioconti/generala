@@ -1,9 +1,9 @@
 import { Fragment } from 'react'
-import { CATEGORIES, FIRST_SPECIAL, scoreOf, totalFor } from '../game/rules'
-import type { CategoryId, Game } from '../game/types'
-import { Chip } from './Chip'
-import { Die } from './Die'
-import { PaperGrain } from './Felt'
+import { CATEGORIES, FIRST_SPECIAL, scoreOf, totalFor } from './rules'
+import type { CategoryId, Game } from './types'
+import { Chip } from '../../components/Chip'
+import { Die } from '../../components/Die'
+import { PaperGrain } from '../../components/Surface'
 
 /**
  * Column widths and type sizes shrink with the player count so the whole sheet
@@ -81,24 +81,24 @@ export function ScoreGrid({ game, onPick }: Props) {
                   .filter(Boolean)
                   .join(' ')
 
-                if (!score) {
-                  return (
-                    <button
-                      key={player.id + category.id}
-                      type="button"
-                      className={className}
-                      aria-label={`Anotar ${category.label} de ${player.name}`}
-                      onClick={() => onPick(player.id, category.id)}
-                    >
-                      <span className="cell__dot" />
-                    </button>
-                  )
-                }
-
+                // Filled cells are buttons too: tapping one reopens it, which is
+                // how a mistyped score gets corrected.
                 return (
-                  <div key={player.id + category.id} className={className}>
-                    {score.kind === 'scratched' ? <Strike /> : score.points}
-                  </div>
+                  <button
+                    key={player.id + category.id}
+                    type="button"
+                    className={className}
+                    aria-label={
+                      score
+                        ? `Corregir ${category.label} de ${player.name}`
+                        : `Anotar ${category.label} de ${player.name}`
+                    }
+                    onClick={() => onPick(player.id, category.id)}
+                  >
+                    {!score && <span className="cell__dot" />}
+                    {score?.kind === 'scratched' && <Strike />}
+                    {score && score.kind !== 'scratched' && score.points}
+                  </button>
                 )
               })}
             </Fragment>

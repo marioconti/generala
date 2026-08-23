@@ -1,4 +1,4 @@
-import { CHIPS } from '../game/rules'
+import { CHIPS } from '../lib/chips'
 
 interface Props {
   /** Index into CHIPS. Wraps, so a player index is always safe to pass. */

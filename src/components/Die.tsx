@@ -1,4 +1,4 @@
-import type { DieFace } from '../game/types'
+import type { DieFace } from '../games/generala/types'
 
 /** Pip centres on the die's 20x20 viewBox — the standard layout for each face. */
 const PIPS: Record<DieFace, [number, number][]> = {

@@ -1,11 +1,6 @@
 :root {
-  /* The table: a casino felt lit from above. */
-  --felt-deep: #06251a;
-  --felt-dark: #0d4229;
-  --felt: #14603d;
-  --felt-lit: #1d7a4f;
-
-  /* The sheet: cream paper with a notebook's blue rules and red margin. */
+  /* ---------------------------------------------------------------- paper */
+  /* The sheet you write on. Shared by every game — only the table changes. */
   --paper: #f2e8d5;
   --paper-lit: #fbf6ea;
   --paper-edge: #e0d4bd;
@@ -13,25 +8,103 @@
   --rule-soft: #e3dac6;
   --red: #b9483f;
 
-  /* Ink. Scores are written in blue, totals in red — as on paper. */
+  /* Ink: scores in blue, totals in red, as on paper. */
   --ink: #1d3557;
   --ink-soft: #5d6f85;
   --ink-faint: #a08d68;
   --ink-ghost: #cdbb98;
 
-  /* Gold marks whose turn it is, and the winner. */
-  --gold: #e8c877;
-  --gold-deep: #c99e46;
-  --gold-ink: #8a6f3e;
+  /* ------------------------------------------------------------- geometry */
+  /* Rounded, not boxy. Everything curves. */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 34px;
+  --r-pill: 999px;
+
+  --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.3);
+  --shadow-deep: 0 26px 54px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
 
   --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --display: 'Abril Fatface', Georgia, 'Times New Roman', serif;
 
-  /* Overridden per player count so the sheet never needs to scroll. */
+  /* ---------------------------------------------------- the table, default */
+  /* Overridden per game by [data-game]. Default is the casino green. */
+  --felt-lit: #1d7a4f;
+  --felt: #14603d;
+  --felt-dark: #0d4229;
+  --felt-deep: #06251a;
+  --accent: #e8c877;
+  --accent-deep: #c99e46;
+  --accent-ink: #3d2f11;
+
+  /* Per-player-count knobs for the generala sheet. */
   --cat-w: 96px;
   --cat-font: 9.5px;
   --cat-track: 1px;
   --cell-size: 20px;
   --name-size: 11px;
-  --chip-size: 30px;
+}
+
+/* =========================================================== game surfaces */
+/*
+ * Each game gets its own table. The felt ramp is always four steps from lit
+ * (under the lamp) to deep (the far corner), so one gradient recipe serves all
+ * of them and only the hues change.
+ */
+
+/* Generala — casino green. Dice, chips, the classic table. */
+[data-game='generala'] {
+  --felt-lit: #1d7a4f;
+  --felt: #14603d;
+  --felt-dark: #0d4229;
+  --felt-deep: #06251a;
+  --accent: #e8c877;
+  --accent-deep: #c99e46;
+  --accent-ink: #3d2f11;
+}
+
+/* Rummy — deep teal. English suits, a cooler, later-in-the-night table. */
+[data-game='rummy'] {
+  --felt-lit: #1d6f85;
+  --felt: #145261;
+  --felt-dark: #0c3846;
+  --felt-deep: #051e28;
+  --accent: #edbc86;
+  --accent-deep: #c9924f;
+  --accent-ink: #3a2712;
+}
+
+/* Chinchón — wine. Spanish deck, oros y copas, a velvet table. */
+[data-game='chinchon'] {
+  --felt-lit: #8d3143;
+  --felt: #6d2333;
+  --felt-dark: #491623;
+  --felt-deep: #240a11;
+  --accent: #e3bd6a;
+  --accent-deep: #bd9440;
+  --accent-ink: #3a2a0d;
+}
+
+/* Truco — olive. The bar table: worn cloth, pencil, a scrap of paper. */
+[data-game='truco'] {
+  --felt-lit: #56683f;
+  --felt: #3e4d2d;
+  --felt-dark: #28331d;
+  --felt-deep: #121810;
+  --accent: #d9c9a3;
+  --accent-deep: #ab9569;
+  --accent-ink: #2e2716;
+}
+
+/* Home — the club at night, before anyone sits down. */
+[data-game='home'] {
+  --felt-lit: #17523c;
+  --felt: #0f3a2c;
+  --felt-dark: #0a251d;
+  --felt-deep: #04100c;
+  --accent: #e8c877;
+  --accent-deep: #c99e46;
+  --accent-ink: #3d2f11;
 }
