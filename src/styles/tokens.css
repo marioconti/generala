@@ -29,6 +29,8 @@
 
   /* Overridden per player count so the sheet never needs to scroll. */
   --cat-w: 96px;
+  --cat-font: 9.5px;
+  --cat-track: 1px;
   --cell-size: 20px;
   --name-size: 11px;
   --chip-size: 30px;

@@ -11,11 +11,11 @@ import { PaperGrain } from './Felt'
  * players the category column is narrow enough that the die carries the label.
  */
 function sizesFor(players: number) {
-  if (players <= 2) return { catW: '96px', cell: '20px', name: '11px', chip: 30 }
-  if (players === 3) return { catW: '92px', cell: '19px', name: '10px', chip: 28 }
-  if (players === 4) return { catW: '86px', cell: '17px', name: '9px', chip: 26 }
-  if (players === 5) return { catW: '78px', cell: '16px', name: '8.5px', chip: 25 }
-  return { catW: '74px', cell: '15px', name: '8px', chip: 24 }
+  if (players <= 2) return { catW: '96px', cell: '20px', name: '11px', chip: 30, catFont: '9.5px', catTrack: '1px' }
+  if (players === 3) return { catW: '92px', cell: '19px', name: '10px', chip: 28, catFont: '9.5px', catTrack: '.8px' }
+  if (players === 4) return { catW: '86px', cell: '17px', name: '9px', chip: 26, catFont: '9px', catTrack: '.6px' }
+  if (players === 5) return { catW: '78px', cell: '16px', name: '8.5px', chip: 25, catFont: '8.5px', catTrack: '.4px' }
+  return { catW: '74px', cell: '15px', name: '8px', chip: 24, catFont: '8px', catTrack: '.2px' }
 }
 
 function Strike() {
@@ -45,6 +45,8 @@ export function ScoreGrid({ game, onPick }: Props) {
             '--cat-w': size.catW,
             '--cell-size': size.cell,
             '--name-size': size.name,
+            '--cat-font': size.catFont,
+            '--cat-track': size.catTrack,
           } as React.CSSProperties
         }
       >

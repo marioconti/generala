@@ -194,8 +194,8 @@ button {
   padding-left: 8px;
   border-bottom: 1px solid var(--rule);
   border-right: 1.5px solid var(--red);
-  font-size: 9.5px;
-  letter-spacing: 1px;
+  font-size: var(--cat-font);
+  letter-spacing: var(--cat-track);
   color: var(--ink-soft);
   font-weight: 600;
   overflow: hidden;
