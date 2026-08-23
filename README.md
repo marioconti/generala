@@ -51,14 +51,23 @@ the keypad carries a sign key. The published Chinchón rules agree:
 
 ## Design
 
-Each game gets its own table: casino green for Generala, deep teal for Rummy, wine for
-Chinchón, olive for Truco. Same recipe underneath — a gradient lit from above, grained
-with SVG turbulence, and a quiet motif per game (dice pips, diamonds, rings, ruled lines)
-— so the four screens feel like four tables in one club rather than one screen recoloured.
+Every screen is a wooden table with a green felt mat laid over it. The mat is inset so the
+timber shows around all four edges — that gap is what makes it read as cloth on a table
+rather than a coloured background. The grain is an SVG turbulence stretched hard along one
+axis (`0.014 x 0.7`), which is what makes noise look like wood instead of static.
 
-On every table sits the same cream sheet. Scores go in blue ink, totals in red, and a
-crossed-out row uses the diagonal stroke you would draw yourself. Players are poker chips
-rather than card suits, because there are only four suits and a sheet takes six players.
+All four tables stay green and vary the shade and the wood tone with it — sage over pale
+oak for Generala, olive over dark walnut for Truco, eucalyptus over grey oak for Rummy,
+moss over cherry for Chinchón. Four corners of the same house, not four products. Each mat
+carries a soft motif stitched into the cloth: dots, waves, leaves, rings.
+
+On every table sits the same cream sheet. Scores go in warm brown ink, totals in
+terracotta, and a crossed-out row uses the diagonal stroke you would draw yourself.
+Players are painted wooden counters — the kind that come in a board-game box — because
+there are only four card suits and a sheet takes six players.
+
+Type is Fredoka over Nunito: rounded and warm. Shadows are brown and diffuse rather than
+black and hard, and nothing on the table has a sharp corner.
 
 Every board fits an iPhone 13 without scrolling in either direction. In Generala the
 column widths and type sizes shrink with the player count to keep that true up to six; at
