@@ -1,110 +1,122 @@
 :root {
   /* ---------------------------------------------------------------- paper */
-  /* The sheet you write on. Shared by every game — only the table changes. */
-  --paper: #f2e8d5;
-  --paper-lit: #fbf6ea;
-  --paper-edge: #e0d4bd;
-  --rule: #cfd9e4;
-  --rule-soft: #e3dac6;
-  --red: #b9483f;
+  /* Warm cream, not bleached. The sheet you write on. */
+  --paper: #f5eddc;
+  --paper-lit: #fdf8ee;
+  --paper-edge: #e2d6bf;
+  --rule: #d9dcc9;
+  --rule-soft: #e7ddc8;
 
-  /* Ink: scores in blue, totals in red, as on paper. */
-  --ink: #1d3557;
-  --ink-soft: #5d6f85;
-  --ink-faint: #a08d68;
-  --ink-ghost: #cdbb98;
+  /* Ink is warm brown, totals are terracotta. Nothing here is cold. */
+  --ink: #463527;
+  --ink-soft: #6f5f4d;
+  --ink-faint: #a08f77;
+  --ink-ghost: #cdbda3;
+  --red: #b3573f;
 
-  /* ------------------------------------------------------------- geometry */
-  /* Rounded, not boxy. Everything curves. */
-  --r-xs: 8px;
-  --r-sm: 12px;
-  --r-md: 18px;
-  --r-lg: 26px;
-  --r-xl: 34px;
+  /* --------------------------------------------------------------- shapes */
+  /* Generously rounded. Nothing on this table has a sharp corner. */
+  --r-xs: 12px;
+  --r-sm: 18px;
+  --r-md: 24px;
+  --r-lg: 32px;
+  --r-xl: 44px;
   --r-pill: 999px;
 
-  --shadow-lift: 0 18px 40px rgba(0, 0, 0, 0.45), 0 3px 8px rgba(0, 0, 0, 0.3);
-  --shadow-deep: 0 26px 54px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+  /* Soft, warm shadows — light through a window, not a spotlight. */
+  --shadow-lift: 0 10px 28px rgba(58, 40, 24, 0.2), 0 2px 6px rgba(58, 40, 24, 0.12);
+  --shadow-deep: 0 18px 40px rgba(58, 40, 24, 0.26), 0 3px 8px rgba(58, 40, 24, 0.14);
 
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --display: 'Abril Fatface', Georgia, 'Times New Roman', serif;
-
-  /* ---------------------------------------------------- the table, default */
-  /* Overridden per game by [data-game]. Default is the casino green. */
-  --felt-lit: #1d7a4f;
-  --felt: #14603d;
-  --felt-dark: #0d4229;
-  --felt-deep: #06251a;
-  --accent: #e8c877;
-  --accent-deep: #c99e46;
-  --accent-ink: #3d2f11;
+  --display: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --mono: 'Nunito', system-ui, -apple-system, sans-serif;
 
   /* Per-player-count knobs for the generala sheet. */
   --cat-w: 96px;
-  --cat-font: 9.5px;
-  --cat-track: 1px;
+  --cat-font: 10px;
+  --cat-track: 0.4px;
   --cell-size: 20px;
   --name-size: 11px;
+
+  /* ------------------------------------------------- the table, by default */
+  --wood-deep: #4a3626;
+  --wood: #6a4d34;
+  --wood-lit: #86653f;
+  --mat-lit: #7ba46f;
+  --mat: #5f8a58;
+  --mat-deep: #446b40;
+  --accent: #e2b054;
+  --accent-deep: #c08e35;
+  --accent-ink: #3f2f14;
 }
 
-/* =========================================================== game surfaces */
+/* ============================================================ game tables */
 /*
- * Each game gets its own table. The felt ramp is always four steps from lit
- * (under the lamp) to deep (the far corner), so one gradient recipe serves all
- * of them and only the hues change.
+ * Every game is played on wood with a felt mat laid over it — the mat colour
+ * shifts per game but stays green, and the wood tone shifts with it. The point
+ * is four corners of the same house, not four different products.
  */
 
-/* Generala — casino green. Dice, chips, the classic table. */
+/* Generala — sage over pale oak. The brightest, friendliest table. */
 [data-game='generala'] {
-  --felt-lit: #1d7a4f;
-  --felt: #14603d;
-  --felt-dark: #0d4229;
-  --felt-deep: #06251a;
-  --accent: #e8c877;
-  --accent-deep: #c99e46;
-  --accent-ink: #3d2f11;
+  --wood-deep: #513a26;
+  --wood: #785835;
+  --wood-lit: #9a7645;
+  --mat-lit: #82ab72;
+  --mat: #648f58;
+  --mat-deep: #46703f;
+  --accent: #e6b95e;
+  --accent-deep: #c2953b;
+  --accent-ink: #3d2e12;
 }
 
-/* Rummy — deep teal. English suits, a cooler, later-in-the-night table. */
-[data-game='rummy'] {
-  --felt-lit: #1d6f85;
-  --felt: #145261;
-  --felt-dark: #0c3846;
-  --felt-deep: #051e28;
-  --accent: #edbc86;
-  --accent-deep: #c9924f;
-  --accent-ink: #3a2712;
-}
-
-/* Chinchón — wine. Spanish deck, oros y copas, a velvet table. */
-[data-game='chinchon'] {
-  --felt-lit: #8d3143;
-  --felt: #6d2333;
-  --felt-dark: #491623;
-  --felt-deep: #240a11;
-  --accent: #e3bd6a;
-  --accent-deep: #bd9440;
-  --accent-ink: #3a2a0d;
-}
-
-/* Truco — olive. The bar table: worn cloth, pencil, a scrap of paper. */
+/* Truco — olive over dark walnut. The bar table, worn in. */
 [data-game='truco'] {
-  --felt-lit: #56683f;
-  --felt: #3e4d2d;
-  --felt-dark: #28331d;
-  --felt-deep: #121810;
-  --accent: #d9c9a3;
-  --accent-deep: #ab9569;
-  --accent-ink: #2e2716;
+  --wood-deep: #3b2a1c;
+  --wood: #5a4028;
+  --wood-lit: #775534;
+  --mat-lit: #7d8a54;
+  --mat: #61703f;
+  --mat-deep: #45522c;
+  --accent: #dfbb6b;
+  --accent-deep: #b8933f;
+  --accent-ink: #3a2f13;
 }
 
-/* Home — the club at night, before anyone sits down. */
+/* Rummy — eucalyptus over grey oak. Cooler, but still green. */
+[data-game='rummy'] {
+  --wood-deep: #40342a;
+  --wood: #63513e;
+  --wood-lit: #836c51;
+  --mat-lit: #6ba396;
+  --mat: #4d8578;
+  --mat-deep: #35635a;
+  --accent: #e5b978;
+  --accent-deep: #bd8f4c;
+  --accent-ink: #3a2a13;
+}
+
+/* Chinchón — moss over reddish cherry. The warmest of the four. */
+[data-game='chinchon'] {
+  --wood-deep: #4c2f22;
+  --wood: #74472e;
+  --wood-lit: #97613a;
+  --mat-lit: #86a065;
+  --mat: #67854d;
+  --mat-deep: #4a6538;
+  --accent: #e8bd63;
+  --accent-deep: #c1943c;
+  --accent-ink: #3d2e12;
+}
+
+/* Home — the table before anyone sits down. */
 [data-game='home'] {
-  --felt-lit: #17523c;
-  --felt: #0f3a2c;
-  --felt-dark: #0a251d;
-  --felt-deep: #04100c;
-  --accent: #e8c877;
-  --accent-deep: #c99e46;
-  --accent-ink: #3d2f11;
+  --wood-deep: #4a3626;
+  --wood: #6f5136;
+  --wood-lit: #8d6b42;
+  --mat-lit: #55855a;
+  --mat: #3d6b45;
+  --mat-deep: #274b32;
+  --accent: #e6b95e;
+  --accent-deep: #c2953b;
+  --accent-ink: #3d2e12;
 }

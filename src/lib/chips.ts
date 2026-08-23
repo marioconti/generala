@@ -1,15 +1,15 @@
 /**
- * Poker chips identify players in every game, not just Generala, so the palette
- * lives here rather than inside one game's rules.
+ * Player tokens: painted wooden counters, the kind that come in a board-game
+ * box. Not poker chips — no notched rims, no casino.
  *
- * Chips instead of card suits because there are only four suits and a sheet
- * takes up to six players.
+ * `edge` is the darker rim of the same paint, so each token reads as a solid
+ * object with a lip rather than a flat circle.
  */
 export const CHIPS = [
-  { fill: '#b03a3a', name: 'rojo' },
-  { fill: '#2f5d8a', name: 'azul' },
-  { fill: '#33383d', name: 'negro' },
-  { fill: '#3d7a55', name: 'verde' },
-  { fill: '#6b4a86', name: 'violeta' },
-  { fill: '#c06b2a', name: 'naranja' },
+  { fill: '#c2703f', edge: '#9a532b', name: 'terracota' },
+  { fill: '#5b7f9c', edge: '#42607a', name: 'azul' },
+  { fill: '#6f9455', edge: '#54743d', name: 'verde' },
+  { fill: '#d4a13e', edge: '#a97c26', name: 'mostaza' },
+  { fill: '#8b6a90', edge: '#6b4f70', name: 'ciruela' },
+  { fill: '#6b5f52', edge: '#4e443a', name: 'carbón' },
 ]

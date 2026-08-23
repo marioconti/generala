@@ -4,23 +4,54 @@ import type { GameId } from '../lib/history'
 export type SurfaceId = GameId | 'home'
 
 /**
- * The table each game is played on.
+ * Wood table, felt mat, and whatever the game puts on top.
  *
- * Same recipe every time — a radial gradient lit from above, grained with SVG
- * turbulence so it reads as cloth — over a per-game palette set in tokens.css.
- * On top of that each game gets its own quiet motif, so the four screens feel
- * like four tables in the same club rather than one screen recoloured.
+ * The mat is inset so the wood shows around all four edges — that gap is what
+ * makes it read as cloth laid on a table rather than a coloured background.
+ *
+ * The grain is an SVG turbulence stretched hard along one axis
+ * (baseFrequency="0.014 0.7"): low frequency across, high frequency down, which
+ * is what makes noise look like wood instead of static.
+ */
+function WoodGrain() {
+  const id = useId().replace(/:/g, '')
+  return (
+    <svg className="surface__wood" aria-hidden="true">
+      <filter id={id}>
+        <feTurbulence type="fractalNoise" baseFrequency="0.014 0.7" numOctaves="4" seed="7" />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+      <rect width="100%" height="100%" filter={`url(#${id})`} />
+    </svg>
+  )
+}
+
+/** Fine, even grain: felt rather than timber. */
+function FeltGrain() {
+  const id = useId().replace(/:/g, '')
+  return (
+    <svg className="surface__felt-grain" aria-hidden="true">
+      <filter id={id}>
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch" />
+      </filter>
+      <rect width="100%" height="100%" filter={`url(#${id})`} />
+    </svg>
+  )
+}
+
+/**
+ * A soft motif stitched into each mat. Rounded shapes only — no hard geometry,
+ * nothing that reads as a casino.
  */
 function Motif({ game }: { game: SurfaceId }) {
   const id = useId().replace(/:/g, '')
-
-  if (game === 'home') return null
+  const spec = PATTERNS[game]
 
   return (
     <svg className="surface__motif" aria-hidden="true">
       <defs>
-        <pattern id={id} width={PATTERNS[game].size} height={PATTERNS[game].size} patternUnits="userSpaceOnUse">
-          {PATTERNS[game].draw}
+        <pattern id={id} width={spec.size} height={spec.size} patternUnits="userSpaceOnUse">
+          {spec.draw}
         </pattern>
       </defs>
       <rect width="100%" height="100%" fill={`url(#${id})`} />
@@ -28,73 +59,82 @@ function Motif({ game }: { game: SurfaceId }) {
   )
 }
 
-const STROKE = 'rgba(255,255,255,.5)'
+const LINE = 'rgba(255,255,255,.42)'
 
-const PATTERNS: Record<Exclude<SurfaceId, 'home'>, { size: number; draw: ReactNode }> = {
-  // Dice pips, scattered on a grid.
+const PATTERNS: Record<SurfaceId, { size: number; draw: ReactNode }> = {
+  // Soft dots, like pips worn into the cloth.
   generala: {
+    size: 52,
+    draw: (
+      <>
+        <circle cx="13" cy="13" r="2.6" fill={LINE} />
+        <circle cx="39" cy="39" r="2.6" fill={LINE} />
+      </>
+    ),
+  },
+  // Gentle waves — the weave of a well-used cloth.
+  truco: {
+    size: 44,
+    draw: (
+      <path d="M0 22 Q11 14 22 22 T44 22" fill="none" stroke={LINE} strokeWidth="1.6" strokeLinecap="round" />
+    ),
+  },
+  // Rounded leaves.
+  rummy: {
+    size: 50,
+    draw: (
+      <path
+        d="M25 12 Q37 25 25 38 Q13 25 25 12 Z"
+        fill="none"
+        stroke={LINE}
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    ),
+  },
+  // Soft rings.
+  chinchon: {
+    size: 48,
+    draw: <circle cx="24" cy="24" r="11" fill="none" stroke={LINE} strokeWidth="1.5" />,
+  },
+  // Scattered dots for the menu.
+  home: {
     size: 46,
     draw: (
       <>
-        <circle cx="10" cy="10" r="1.6" fill={STROKE} />
-        <circle cx="33" cy="24" r="1.6" fill={STROKE} />
-        <circle cx="17" cy="36" r="1.6" fill={STROKE} />
+        <circle cx="12" cy="12" r="2.2" fill={LINE} />
+        <circle cx="34" cy="30" r="2.2" fill={LINE} />
       </>
     ),
-  },
-  // Diamonds — the English deck.
-  rummy: {
-    size: 40,
-    draw: <path d="M20 6 L28 20 L20 34 L12 20 Z" fill="none" stroke={STROKE} strokeWidth="1.1" />,
-  },
-  // Concentric rings, after the "oros" of the Spanish deck.
-  chinchon: {
-    size: 44,
-    draw: (
-      <>
-        <circle cx="22" cy="22" r="9" fill="none" stroke={STROKE} strokeWidth="1.1" />
-        <circle cx="22" cy="22" r="3.2" fill="none" stroke={STROKE} strokeWidth="1" />
-      </>
-    ),
-  },
-  // Ruled lines: the scrap of paper on the bar table.
-  truco: {
-    size: 26,
-    draw: <path d="M0 25 H26" stroke={STROKE} strokeWidth="1" />,
   },
 }
 
 export function Surface({ game, children }: { game: SurfaceId; children: ReactNode }) {
-  const noiseId = useId().replace(/:/g, '')
-
   // Stamped on <html> too, so the colour behind the notch and under an iOS
-  // rubber-band scroll matches the table instead of flashing the default green.
+  // rubber-band scroll is the table, not a default.
   useEffect(() => {
     document.documentElement.dataset.game = game
   }, [game])
 
   return (
     <div className="surface" data-game={game}>
-      <svg className="surface__grain" aria-hidden="true">
-        <filter id={noiseId}>
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter={`url(#${noiseId})`} />
-      </svg>
-      <Motif game={game} />
-      <div className="surface__vignette" />
+      <WoodGrain />
+      <div className="surface__mat">
+        <FeltGrain />
+        <Motif game={game} />
+      </div>
       <div className="surface__inner">{children}</div>
     </div>
   )
 }
 
-/** The paper grain inside a sheet. Much fainter than the cloth. */
+/** The paper grain inside a sheet. Fainter than the felt. */
 export function PaperGrain() {
   const id = useId().replace(/:/g, '')
   return (
     <svg className="sheet__grain" aria-hidden="true">
       <filter id={id}>
-        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" />
       </filter>
       <rect width="100%" height="100%" filter={`url(#${id})`} />
     </svg>
