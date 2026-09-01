@@ -967,19 +967,45 @@ a {
   background: var(--ink-ghost);
 }
 
+/*
+ * The number sits to the right and the figure stands at the left. Standing
+ * still it takes about a third of its own box, so at two players the two never
+ * touch and at six it only reaches the first digit -- and when it throws its
+ * arms out it climbs over the total, which is the whole idea.
+ */
 .cell--total {
-  flex-direction: column;
-  justify-content: center;
-  gap: 1px;
+  justify-content: flex-end;
+  padding: 0 4px 0 2px;
   border-bottom: none;
   border-top: 2px solid var(--red);
-  font-size: calc(var(--cell-size) + 7px);
+  font-size: calc(var(--cell-size) + 6px);
   font-weight: 700;
   color: var(--red);
 }
 
 .cell__total-num {
   line-height: 1;
+  /*
+   * Stays centred in the cell and simply lets the figure stand in front of it.
+   * Nudging it clear works at two players and runs the number out of the cell
+   * at six, where there is no room for both -- and being climbed on is the
+   * point.
+   */
+  position: relative;
+  z-index: 0;
+}
+
+/*
+ * The figure stands on the floor of its own cell, at the left, and is allowed
+ * to overlap the total it belongs to. At six players there is not room for both
+ * side by side, and a little man leaning into the number is better company than
+ * a little man shrunk to fit beside it. The paper halo keeps both readable.
+ */
+.cell--total .stickman {
+  position: absolute;
+  left: -1px;
+  bottom: 2px;
+  z-index: 1;
 }
 
 /*

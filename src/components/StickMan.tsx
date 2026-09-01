@@ -70,13 +70,14 @@ function useReducedMotion(): boolean {
   return reduced
 }
 
+type Bone = 'torso' | 'armL' | 'armR' | 'legL' | 'legR'
+
+const BONES: Bone[] = ['torso', 'armL', 'armR', 'legL', 'legR']
+
 interface Parts {
-  torso: SVGPolylineElement
-  armL: SVGPolylineElement
-  armR: SVGPolylineElement
-  legL: SVGPolylineElement
-  legR: SVGPolylineElement
-  head: SVGGElement
+  /** Two of each bone: the paper-coloured halo behind, the ink in front. */
+  bones: Record<Bone, SVGPolylineElement[]>
+  heads: SVGGElement[]
   body: SVGGElement
   tear: SVGGElement
 }
@@ -107,16 +108,20 @@ export function StickMan({ mood, size, seed, shock }: Props) {
   useEffect(() => {
     const root = svg.current
     if (!root) return
-    const find = (name: string) => root.querySelector(`[data-part="${name}"]`)
+    const all = (name: string) =>
+      [...root.querySelectorAll(`[data-part="${name}"]`)] as SVGPolylineElement[]
+
     parts.current = {
-      torso: find('torso') as SVGPolylineElement,
-      armL: find('armL') as SVGPolylineElement,
-      armR: find('armR') as SVGPolylineElement,
-      legL: find('legL') as SVGPolylineElement,
-      legR: find('legR') as SVGPolylineElement,
-      head: find('head') as SVGGElement,
-      body: find('body') as SVGGElement,
-      tear: find('tear') as SVGGElement,
+      bones: {
+        torso: all('torso'),
+        armL: all('armL'),
+        armR: all('armR'),
+        legL: all('legL'),
+        legR: all('legR'),
+      },
+      heads: [...root.querySelectorAll('[data-part="head"]')] as SVGGElement[],
+      body: root.querySelector('[data-part="body"]') as SVGGElement,
+      tear: root.querySelector('[data-part="tear"]') as SVGGElement,
     }
   }, [])
 
@@ -124,15 +129,17 @@ export function StickMan({ mood, size, seed, shock }: Props) {
     const p = parts.current
     if (!p) return
     const bones = build(pose)
-    p.torso.setAttribute('points', bones.torso)
-    p.armL.setAttribute('points', bones.armL)
-    p.armR.setAttribute('points', bones.armR)
-    p.legL.setAttribute('points', bones.legL)
-    p.legR.setAttribute('points', bones.legR)
-    p.head.setAttribute('transform', bones.head)
-    // A spin is the whole body squashing through zero, so it scales the group
-    // rather than any single bone.
-    p.body.setAttribute('transform', `scale(${pose.flip.toFixed(3)} 1)`)
+    for (const name of BONES) {
+      for (const el of p.bones[name]) el.setAttribute('points', bones[name])
+    }
+    for (const head of p.heads) head.setAttribute('transform', bones.head)
+    // A spin is the whole body squashing through zero and a cartwheel is it
+    // turning over, so both belong on the group rather than on any one bone.
+    p.body.setAttribute(
+      'transform',
+      `scale(${(pose.flip * pose.scale).toFixed(3)} ${pose.scale.toFixed(3)}) ` +
+        `rotate(${pose.roll.toFixed(1)})`,
+    )
   }, [])
 
   // Someone who asked their system for less motion gets a figure that simply
@@ -229,29 +236,40 @@ export function StickMan({ mood, size, seed, shock }: Props) {
       aria-hidden="true"
       focusable="false"
     >
-      <g
-        data-part="body"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="4.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <polyline data-part="legL" points="" />
-        <polyline data-part="legR" points="" />
-        <polyline data-part="torso" points="" />
-        <polyline data-part="armL" points="" />
-        <polyline data-part="armR" points="" />
+      <g data-part="body" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        {/*
+          Drawn twice: first a fat paper-coloured outline, then the ink. The
+          figure stands over the total it belongs to, and the halo is what keeps
+          both readable where they overlap.
+        */}
+        {[true, false].map((halo) => (
+          <g
+            key={halo ? 'halo' : 'ink'}
+            className={halo ? 'stickman__halo' : undefined}
+            stroke={halo ? 'var(--paper)' : 'currentColor'}
+            strokeWidth={halo ? 9.5 : 4.2}
+          >
+            <polyline data-part="legL" points="" />
+            <polyline data-part="legR" points="" />
+            <polyline data-part="torso" points="" />
+            <polyline data-part="armL" points="" />
+            <polyline data-part="armR" points="" />
 
-        <g data-part="head">
-          <circle cx="0" cy="0" r={HEAD_RADIUS} strokeWidth="3.6" />
-          <path className="face face--happy" d="M-4 1.5 Q0 5.5 4 1.5" strokeWidth="2.2" />
-          <path className="face face--sad" d="M-4 4 Q0 0.5 4 4" strokeWidth="2.2" />
-          <path className="face face--flat" d="M-3.5 2.6 L3.5 2.6" strokeWidth="2.2" />
-          <g className="face face--sad" data-part="tear" opacity="0">
-            <path d="M3.2 0.8 L3.2 6.6" strokeWidth="2" />
+            <g data-part="head">
+              <circle cx="0" cy="0" r={HEAD_RADIUS} strokeWidth={halo ? 8 : 3.6} />
+              {!halo && (
+                <>
+                  <path className="face face--happy" d="M-4 1.5 Q0 5.5 4 1.5" strokeWidth="2.2" />
+                  <path className="face face--sad" d="M-4 4 Q0 0.5 4 4" strokeWidth="2.2" />
+                  <path className="face face--flat" d="M-3.5 2.6 L3.5 2.6" strokeWidth="2.2" />
+                  <g className="face face--sad" data-part="tear" opacity="0">
+                    <path d="M3.2 0.8 L3.2 6.6" strokeWidth="2" />
+                  </g>
+                </>
+              )}
+            </g>
           </g>
-        </g>
+        ))}
       </g>
     </svg>
   )

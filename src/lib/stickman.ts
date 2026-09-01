@@ -34,6 +34,18 @@ export interface Pose {
   legR?: [number, number]
   /** Horizontal squash, 1 facing us and -1 turned around. Fakes a spin. */
   flip?: number
+  /**
+   * Rotation of the whole body about the hip, in degrees. This is what makes a
+   * cartwheel or a somersault possible at all: no arrangement of joint angles
+   * can turn a figure upside down.
+   */
+  roll?: number
+  /**
+   * Whole-body scale about the hip. A figure turning over sweeps a circle the
+   * radius of its own height, which no sensible viewBox can hold; tucking in as
+   * it goes is both how the box stays tight and how a real cartwheel works.
+   */
+  scale?: number
 }
 
 /** Every pose is merged over this one, so a pose only states what it changes. */
@@ -47,6 +59,8 @@ export const REST: Required<Pose> = {
   legL: [6, 0],
   legR: [6, 0],
   flip: 1,
+  roll: 0,
+  scale: 1,
 }
 
 export type Ease = 'smooth' | 'snap' | 'bounce'
@@ -168,6 +182,16 @@ export function sit(thigh: number, knee: number): Required<Pick<Pose, 'y' | 'leg
 
 /** Where a pose puts the hands and the feet. Used by the pose checks. */
 export function landmarks(pose: Required<Pose>) {
+  // The body group is drawn as scale(flip) rotate(roll), so a point goes
+  // through the rotation first and the flip second. Without this the pose
+  // check would wave a cartwheel straight through.
+  const spun = ([x, y]: Point): Point => {
+    const r = (pose.roll * Math.PI) / 180
+    const rx = x * Math.cos(r) - y * Math.sin(r)
+    const ry = x * Math.sin(r) + y * Math.cos(r)
+    return [rx * pose.flip * pose.scale, ry * pose.scale]
+  }
+
   const hip: Point = [pose.x, pose.y]
   const neck = tip(hip, NECK, 180 + pose.torso)
   const headCentre = tip(neck, HEAD_R + 2.5, 180 + pose.torso + pose.head)
@@ -185,11 +209,11 @@ export function landmarks(pose: Required<Pose>) {
   }
 
   return {
-    head: headCentre,
-    handL: end(neck, pose.armL, -1, UPPER_ARM, FOREARM, pose.torso),
-    handR: end(neck, pose.armR, 1, UPPER_ARM, FOREARM, pose.torso),
-    footL: end(hip, pose.legL, -1, THIGH, SHIN, 0),
-    footR: end(hip, pose.legR, 1, THIGH, SHIN, 0),
+    head: spun(headCentre),
+    handL: spun(end(neck, pose.armL, -1, UPPER_ARM, FOREARM, pose.torso)),
+    handR: spun(end(neck, pose.armR, 1, UPPER_ARM, FOREARM, pose.torso)),
+    footL: spun(end(hip, pose.legL, -1, THIGH, SHIN, 0)),
+    footR: spun(end(hip, pose.legR, 1, THIGH, SHIN, 0)),
     floor: STANDING_REACH,
   }
 }
@@ -226,6 +250,8 @@ export function blend(a: Required<Pose>, b: Required<Pose>, t: number): Required
     legL: blendPair(a.legL, b.legL, t),
     legR: blendPair(a.legR, b.legR, t),
     flip: lerp(a.flip, b.flip, t),
+    roll: lerp(a.roll, b.roll, t),
+    scale: lerp(a.scale, b.scale, t),
   }
 }
 

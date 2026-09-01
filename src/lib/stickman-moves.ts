@@ -28,7 +28,7 @@ export const DANCES: Move[] = [
   {
     // Slides one way and back, so the loop does not teleport him home.
     id: 'moonwalk',
-    cycle: 2000,
+    cycle: 1500,
     ease: 'smooth',
     poses: [
       { x: 8, torso: -6, legR: [26, 0], legL: [-16, 48], armR: [18, 12], armL: [12, 8] },
@@ -76,7 +76,7 @@ export const DANCES: Move[] = [
   },
   {
     id: 'sprinkler',
-    cycle: 1800,
+    cycle: 1250,
     ease: 'smooth',
     poses: [
       { armR: [92, 0], armL: [138, 86], legL: [10, 14], legR: [10, 14] },
@@ -168,7 +168,7 @@ export const DANCES: Move[] = [
   },
   {
     id: 'hip-swing',
-    cycle: 1500,
+    cycle: 1150,
     ease: 'smooth',
     poses: [
       { torso: -13, legR: [26, 6], legL: [-5, 9], armR: [32, 18], armL: [12, 8], head: 9, y: 3 },
@@ -211,7 +211,7 @@ export const DANCES: Move[] = [
   },
   {
     id: 'ymca',
-    cycle: 2600,
+    cycle: 2100,
     ease: 'snap',
     poses: [
       { armR: [148, 22], armL: [148, 22], y: -5, legL: [14, 10], legR: [14, 10] },
@@ -222,11 +222,92 @@ export const DANCES: Move[] = [
   },
   {
     id: 'strut',
-    cycle: 1500,
+    cycle: 1150,
     ease: 'smooth',
     poses: [
       { legR: [22, 12], legL: [-12, 6], armR: [62, 114], armL: [50, 104], torso: -8, head: 13, y: -3, x: 3 },
       { legL: [22, 12], legR: [-12, 6], armR: [50, 104], armL: [62, 114], torso: -5, head: -13, y: -1, x: -3 },
+    ],
+  },
+  {
+    // Ballet: down through a deep plie and back up, arms through the crown.
+    id: 'plie',
+    cycle: 1900,
+    ease: 'smooth',
+    poses: [
+      { ...sit(58, -50), armR: [96, 30], armL: [96, 30], torso: 0, head: 6 },
+      { ...sit(78, -70), armR: [150, 26], armL: [150, 26], head: -8 },
+      { legL: [30, 0], legR: [30, 0], armR: [110, 16], armL: [110, 16], y: -6, head: 4 },
+      { ...sit(66, -58), armR: [70, 40], armL: [70, 40] },
+    ],
+  },
+  {
+    // Down on the knees, hands there for balance, hips doing the work.
+    id: 'twerk',
+    cycle: 460,
+    ease: 'snap',
+    poses: [
+      { ...sit(62, -54), torso: 26, head: -22, armR: [56, 74], armL: [56, 74] },
+      { ...sit(74, -66), torso: 12, head: -12, armR: [50, 66], armL: [50, 66], y: 3 },
+    ],
+  },
+  {
+    // Grand jete: both legs thrown open in the air, arms wide.
+    id: 'grand-jete',
+    cycle: 1500,
+    ease: 'smooth',
+    poses: [
+      { ...sit(54, -46), armR: [40, 20], armL: [40, 20], torso: -4 },
+      { y: -16, legR: [64, 8], legL: [-58, -6], armR: [104, 8], armL: [104, 8], torso: -6 },
+      { y: -14, legR: [70, 4], legL: [-64, -4], armR: [112, 4], armL: [112, 4], torso: -4 },
+      { ...sit(48, -42), armR: [56, 34], armL: [56, 34], torso: 4 },
+    ],
+  },
+  {
+    // Aerobics class: star jumps, and the grin of somebody enjoying it.
+    id: 'aerobics',
+    cycle: 760,
+    ease: 'bounce',
+    poses: [
+      { y: -11, legR: [34, 0], legL: [34, 0], armR: [156, 8], armL: [156, 8] },
+      { ...sit(20, -18), legR: [7, 0], legL: [7, 0], armR: [10, 6], armL: [10, 6] },
+    ],
+  },
+  {
+    // Artistic gymnastics: a tuck jump, knees snapped up to the chest.
+    id: 'tuck-jump',
+    cycle: 1000,
+    ease: 'bounce',
+    poses: [
+      { ...sit(52, -44), armR: [30, 16], armL: [30, 16], torso: -6 },
+      { y: -18, legR: [66, -118], legL: [66, -118], armR: [66, 96], armL: [66, 96], torso: 4 },
+      { y: -12, legR: [40, -80], legL: [40, -80], armR: [96, 40], armL: [96, 40] },
+      { ...sit(44, -38), armR: [40, 26], armL: [40, 26], torso: -3 },
+    ],
+  },
+  {
+    // A cartwheel, which is the whole reason the rig can roll at all.
+    id: 'cartwheel',
+    cycle: 1600,
+    ease: 'smooth',
+    poses: [
+      { roll: 0, legR: [26, 0], legL: [-8, 6], armR: [140, 10], armL: [40, 10], torso: 8 },
+      { roll: -96, y: -2, scale: 0.71, legR: [40, 0], legL: [-40, 0], armR: [150, 0], armL: [150, 0] },
+      { roll: -186, y: -4, scale: 0.72, legR: [34, 0], legL: [-34, 0], armR: [160, 0], armL: [160, 0] },
+      { roll: -274, y: -2, scale: 0.71, legR: [40, 0], legL: [-40, 0], armR: [150, 0], armL: [150, 0] },
+      { roll: -360, legL: [26, 0], legR: [-8, 6], armL: [140, 10], armR: [40, 10], torso: -8 },
+    ],
+  },
+  {
+    // And a somersault, tucked, which is the same trick with the knees in.
+    id: 'somersault',
+    cycle: 1400,
+    ease: 'smooth',
+    poses: [
+      { ...sit(50, -44), armR: [40, 20], armL: [40, 20], roll: 0 },
+      { roll: -130, y: -10, scale: 0.84, legR: [76, -150], legL: [76, -150], armR: [30, 128], armL: [30, 128] },
+      { roll: -250, y: -12, scale: 0.66, legR: [80, -156], legL: [80, -156], armR: [26, 134], armL: [26, 134] },
+      { roll: -360, y: -3, scale: 0.9, legR: [34, -20], legL: [34, -20], armR: [96, 40], armL: [96, 40] },
     ],
   },
 ]
@@ -235,7 +316,7 @@ export const SORROWS: Move[] = [
   {
     // Sat down, elbows on knees, head hanging. Only the breathing moves.
     id: 'sit-sad',
-    cycle: 2800,
+    cycle: 4200,
     ease: 'smooth',
     poses: [
       { ...sit(88, -88), torso: 8, head: 26, armL: [42, 40], armR: [42, 40] },
@@ -245,7 +326,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'cry',
-    cycle: 1300,
+    cycle: 2200,
     ease: 'smooth',
     tear: true,
     poses: [
@@ -255,7 +336,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'head-hands',
-    cycle: 2200,
+    cycle: 3400,
     ease: 'smooth',
     poses: [
       { armR: [160, 92], armL: [160, 92], torso: 5, head: 12 },
@@ -264,7 +345,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'slump',
-    cycle: 3200,
+    cycle: 4400,
     ease: 'smooth',
     poses: [
       { torso: 13, head: 24, armR: [-6, 22], armL: [-6, 22], ...sit(30, -26), x: 4 },
@@ -273,7 +354,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'facepalm',
-    cycle: 2400,
+    cycle: 4000,
     ease: 'smooth',
     poses: [
       { armR: [12, 8], head: 6, torso: 3 },
@@ -283,7 +364,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'kick-dirt',
-    cycle: 2000,
+    cycle: 3600,
     ease: 'smooth',
     poses: [
       { legR: [8, 0], torso: 7, head: 19, armR: [-4, 14], armL: [-4, 14] },
@@ -293,7 +374,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'shrug',
-    cycle: 1900,
+    cycle: 3000,
     ease: 'snap',
     poses: [
       { armR: [78, 96], armL: [78, 96], head: 4, y: 0 },
@@ -302,29 +383,28 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'pace',
-    cycle: 2800,
+    cycle: 4400,
     ease: 'smooth',
     poses: [
-      { x: 8, torso: 4, head: 16, legR: [24, 22], legL: [-10, 6], armR: [10, 40], armL: [10, 40] },
-      { x: 0, torso: 5, head: 18, legR: [8, 4], legL: [8, 4] },
-      { x: -8, torso: 4, head: 16, legL: [24, 22], legR: [-10, 6] },
-      { x: 0, torso: 5, head: 18, legL: [8, 4], legR: [8, 4] },
+      { x: 8, torso: 4, head: 16, legR: [24, 22], legL: [-10, 6], armR: [156, 84], armL: [156, 84] },
+      { x: 0, torso: 6, head: 20, legR: [8, 4], legL: [8, 4], armR: [150, 92], armL: [150, 92] },
+      { x: -8, torso: 4, head: 16, legL: [24, 22], legR: [-10, 6], armR: [156, 84], armL: [156, 84] },
+      { x: 0, torso: 7, head: 21, legL: [8, 4], legR: [8, 4], armR: [150, 92], armL: [150, 92] },
     ],
   },
   {
     id: 'nail-bite',
-    cycle: 1900,
+    cycle: 4200,
     ease: 'smooth',
     poses: [
-      { armR: [162, 96], armL: [-8, 26], head: -16, torso: 3 },
-      { armR: [158, 104], armL: [-10, 30], head: -4, torso: 5, y: 2 },
-      { armR: [30, 20], armL: [-8, 26], head: 15, torso: 7, y: 3 },
-      { armL: [160, 100], armR: [-8, 24], head: -13, torso: -3 },
+      { armR: [162, 96], armL: [-8, 26], head: -15, torso: 3 },
+      { armR: [158, 103], armL: [-9, 29], head: -6, torso: 5, y: 2 },
+      { armR: [160, 99], armL: [-8, 27], head: -18, torso: 4 },
     ],
   },
   {
     id: 'arms-crossed',
-    cycle: 1400,
+    cycle: 2600,
     ease: 'snap',
     poses: [
       { armR: [40, 122], armL: [40, 122], head: 11, legR: [10, 0], torso: 4 },
@@ -333,7 +413,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'look-away',
-    cycle: 2900,
+    cycle: 4000,
     ease: 'smooth',
     poses: [
       { head: -33, torso: -7, armR: [8, 16], armL: [8, 16], x: -3 },
@@ -345,7 +425,7 @@ export const SORROWS: Move[] = [
   {
     // Air goes out of him, and comes back in only to go out again.
     id: 'deflate',
-    cycle: 3400,
+    cycle: 4600,
     ease: 'smooth',
     poses: [
       { y: -3, torso: 0, head: -6, armR: [16, 6], armL: [16, 6] },
@@ -355,7 +435,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'hug-knees',
-    cycle: 2800,
+    cycle: 4000,
     ease: 'smooth',
     tear: true,
     poses: [
@@ -365,7 +445,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'wipe-tear',
-    cycle: 2400,
+    cycle: 4200,
     ease: 'smooth',
     tear: true,
     poses: [
@@ -378,7 +458,7 @@ export const SORROWS: Move[] = [
   {
     // Looks over at the sheet, then wishes he had not.
     id: 'check-sheet',
-    cycle: 2700,
+    cycle: 4600,
     ease: 'smooth',
     poses: [
       { torso: -15, head: -29, armR: [32, 62], armL: [10, 20], x: -3 },
@@ -389,7 +469,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'hands-hips',
-    cycle: 2600,
+    cycle: 3800,
     ease: 'smooth',
     poses: [
       { armR: [54, 118], armL: [54, 118], head: -26, torso: -10, y: -3 },
@@ -398,7 +478,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'kneel',
-    cycle: 3000,
+    cycle: 4400,
     ease: 'smooth',
     poses: [
       { torso: 6, head: 16, legL: [8, 8], legR: [8, 8], armR: [-4, 18], armL: [-4, 18] },
@@ -408,7 +488,7 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'scratch-head',
-    cycle: 2300,
+    cycle: 4000,
     ease: 'smooth',
     poses: [
       { armR: [168, 74], armL: [58, 112], head: -15, torso: 5, legR: [20, 0] },
@@ -419,7 +499,7 @@ export const SORROWS: Move[] = [
   {
     // Doing nothing, on purpose. Next to four dancers it reads as defeat.
     id: 'stare',
-    cycle: 3400,
+    cycle: 4600,
     ease: 'smooth',
     poses: [
       { head: 8, torso: 2, armR: [6, 10], armL: [6, 10], y: 1 },
@@ -428,12 +508,39 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'fetal',
-    cycle: 3000,
+    cycle: 4400,
     ease: 'smooth',
     tear: true,
     poses: [
       { ...sit(84, -168), torso: 31, head: 32, armL: [-26, -84], armR: [-26, -84] },
       { ...sit(84, -168), torso: -15, head: 34, armL: [-28, -88], armR: [-28, -88] },
+    ],
+  },
+  {
+    // Gets up, stands there, gives up and sits back down. The whole cycle is
+    // one long shrug at the scoresheet.
+    id: 'up-and-down',
+    cycle: 5200,
+    ease: 'smooth',
+    poses: [
+      { ...sit(88, -88), torso: 10, head: 26, armL: [40, 42], armR: [40, 42] },
+      { ...sit(60, -54), torso: 18, head: 22, armL: [30, 60], armR: [30, 60] },
+      { torso: 4, head: 12, armR: [10, 14], armL: [10, 14] },
+      { torso: 7, head: 20, armR: [54, 116], armL: [54, 116] },
+      { ...sit(56, -50), torso: 16, head: 24, armL: [34, 56], armR: [34, 56] },
+      { ...sit(88, -88), torso: 11, head: 28, armL: [42, 40], armR: [42, 40] },
+    ],
+  },
+  {
+    // Hands behind the back, wearing a track in the floor.
+    id: 'trudge',
+    cycle: 5000,
+    ease: 'smooth',
+    poses: [
+      { x: 9, torso: 8, head: 22, legR: [22, 16], legL: [-8, 8], armR: [-22, 40], armL: [-22, 40] },
+      { x: 3, torso: 9, head: 24, legR: [8, 4], legL: [8, 4] },
+      { x: -9, torso: 8, head: 22, legL: [22, 16], legR: [-8, 8] },
+      { x: -3, torso: 10, head: 25, legL: [8, 4], legR: [8, 4] },
     ],
   },
 ]

@@ -145,6 +145,21 @@ The design targets a phone. Test it on one.
     feet never left the ground, three dances animated entirely above the waist, and
     four pairs that were one move under two names — `strut` and `running-man` were
     3.9 apart, `nail-bite` and `scratch-head` 1.5.
+  - The metric that matters for mood is **speed, not distance**. Chasing an
+    amplitude threshold once turned the sorrows into dances: pacing the floor
+    covers as much ground as a two-step, and the difference is that it takes four
+    seconds to do it. Sorrows now run at 4-64 units per second and dances start at
+    134, with nothing in between, so which mood a figure is in reads from across
+    the table.
+  - `roll` and `scale` each exist for one reason: no arrangement of joint angles
+    can turn a figure upside down, and a figure turning over sweeps a circle the
+    radius of its own height, which no sensible viewBox holds. So a cartwheel
+    tucks in as it goes, which is also how a real one works.
+  - The figure **stands to the left of its total and is allowed to climb on it**.
+    Standing still it occupies about a third of its own box, so at two players the
+    two never touch; at six there is no room for both and it reaches into the
+    first digit. Every bone is drawn twice, a fat paper-coloured halo behind the
+    ink, so both stay readable wherever they overlap.
 - **Crossing a row out is the loudest thing on the sheet**, so it behaves like it:
   the line draws itself in, ink flies off the pen, the sheet takes the hit, and that
   player's figure spends two and a half seconds taking it personally before going
