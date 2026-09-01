@@ -113,6 +113,29 @@ The design targets a phone. Test it on one.
 - **One small store per game** (`lib/store.ts`, on `useSyncExternalStore`) rather than four
   React providers: setup and board are separate routes and would otherwise hold separate
   copies of the same game.
+- **You pick the score, never the arithmetic.** A number row can only ever hold six
+  values (0 to five dice times its face), so those six totals are the buttons. The
+  earlier version asked how many dice showed the face and printed the product below,
+  which made the anotador do the multiplying in front of you — the wrong job for a
+  scoresheet. The dice under each number are a reminder of what the value means, not a
+  sum to work out.
+- **Nobody fills in a form to start a game.** The setup screen is a table being
+  set: each player is a counter on the felt, empty seats are drawn so the minimum
+  is visible without a sentence explaining it, and whoever has played before is one
+  tap away. There is a single line to write on, and by the third night it is barely
+  used. Suggestions deliberately show no colour — a player's counter depends on the
+  seat they take, which is not decided until they are added.
+- **The closing line is picked, not composed** (`lib/verdicts.ts`). Each band of
+  margin has a pool of headlines; a line that had to qualify — a clean sheet, four
+  scratches, a full table — is weighted to come up three times as often, because
+  landing on one of those is the point. Two constraints hold the pool together: a
+  line may only use what the app actually knows (margin, scratches, players,
+  names) and never invent how the game went, and it may never say "arriba", since
+  chinchón is won by the lowest score. The pick is seeded off the finished game
+  rather than `Math.random()`, so revisiting the card shows the same verdict.
+- **Truco keeps its own taunts** instead of using that pool: truco is scored by
+  team, the default names are Nosotros / Ellos, and every line in the pool agrees
+  with a singular subject. "Ellos perdió por 4" is not worth a better joke.
 - **Editing a score can reopen a finished game.** That is deliberate — a mistyped score
   should be fixable after the fact. The history entry is amended rather than appended, so
   one game never counts twice toward the championship.

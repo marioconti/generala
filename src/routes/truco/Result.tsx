@@ -14,7 +14,14 @@ export function TrucoResult() {
   const loserIndex = winnerIndex === 0 ? 1 : 0
   const loserPoints = game.points[loserIndex]
 
-  // The classic taunts, and they are the whole point of writing this down.
+  /**
+   * The classic taunts, and they are the whole point of writing this down.
+   *
+   * These deliberately do NOT use the shared pool in lib/verdicts.ts: that pool
+   * addresses one person by name ("Ana perdió por 4"), and truco is scored by
+   * team, where the names default to Nosotros / Ellos. "Ellos perdió por 4" is
+   * wrong, and no amount of good lines is worth broken agreement.
+   */
   const verdict =
     loserPoints === 0
       ? 'LA VACA'

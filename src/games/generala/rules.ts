@@ -1,3 +1,4 @@
+import type { Band } from '../../lib/verdicts'
 import type { Category, CategoryId, Game, Player, Score } from './types'
 
 /**
@@ -89,21 +90,13 @@ export function ranking(game: Game): RankEntry[] {
 }
 
 /**
- * The headline on the winner card. Reads the margin between first and second,
- * so it says something true about the game that was actually played.
+ * Which pool of closing lines this game earned. Generala runs to a few hundred
+ * points, so the bands are wide — 40 points apart is not a close game here.
  */
-export function verdict(margin: number, tied: boolean): string {
-  if (tied) return 'EMPATE'
-  if (margin >= 80) return 'PALIZA'
-  if (margin >= 40) return 'GANÓ CÓMODO'
-  if (margin >= 10) return 'PARTIDO PAREJO'
-  return 'POR UN PELO'
-}
-
-export function verdictNote(margin: number, tied: boolean, scratched: number): string {
-  if (tied) return 'Definan a los gritos.'
-  const lead = `Le sacó ${margin}.`
-  if (scratched === 0) return `${lead} No tachó ni una vez.`
-  if (scratched === 1) return `${lead} Tachó una sola vez.`
-  return `${lead} Y eso que tachó ${scratched} veces.`
+export function bandFor(margin: number, tied: boolean): Band {
+  if (tied) return 'tied'
+  if (margin >= 80) return 'blowout'
+  if (margin >= 40) return 'comfortable'
+  if (margin >= 10) return 'close'
+  return 'photo'
 }

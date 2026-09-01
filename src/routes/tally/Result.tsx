@@ -4,14 +4,18 @@ import { Surface } from '../../components/Surface'
 import { ranking, type TallyVariant } from '../../games/tally/rules'
 import { useTally } from '../../games/tally/useTally'
 import { GAME_NAMES } from '../../lib/history'
+import { pickVerdict, type Band } from '../../lib/verdicts'
 
-/** Reads the margin, so the line says something true about the game just played. */
-function verdictFor(margin: number, tied: boolean, hands: number): { verdict: string; note: string } {
-  if (tied) return { verdict: 'EMPATE', note: 'Definan a los gritos.' }
-  if (margin >= 60) return { verdict: 'PALIZA', note: `Le sacó ${margin} en ${hands} manos.` }
-  if (margin >= 25) return { verdict: 'GANÓ CÓMODO', note: `Diferencia de ${margin}.` }
-  if (margin >= 8) return { verdict: 'PARTIDO PAREJO', note: `Apenas ${margin} de diferencia.` }
-  return { verdict: 'POR UN PELO', note: `${margin} de diferencia. Revancha ya.` }
+/**
+ * These games are played to 100, not to a few hundred like generala, so the
+ * bands sit much closer together than generala's.
+ */
+function bandFor(margin: number, tied: boolean): Band {
+  if (tied) return 'tied'
+  if (margin >= 60) return 'blowout'
+  if (margin >= 25) return 'comfortable'
+  if (margin >= 8) return 'close'
+  return 'photo'
 }
 
 export function TallyResult({ variant }: { variant: TallyVariant }) {
@@ -26,7 +30,17 @@ export function TallyResult({ variant }: { variant: TallyVariant }) {
   const winners = table.filter((r) => r.total === best)
   const rest = table.filter((r) => r.total !== best)
   const margin = rest.length > 0 ? Math.abs(rest[0].total - best) : 0
-  const { verdict, note } = verdictFor(margin, winners.length > 1, game.rounds.length)
+  const { verdict, note } = pickVerdict(bandFor(margin, winners.length > 1), {
+    margin,
+    winner: winners[0].player.name,
+    loser: rest[0]?.player.name ?? '',
+    winnersCount: winners.length,
+    players: game.players.length,
+    // Nothing to scratch in these games — null, not 0, or the card would
+    // congratulate the winner for never doing something impossible here.
+    scratched: null,
+    seed: game.finishedAt ?? '',
+  })
 
   const toPlacing = (r: (typeof table)[number]): Placing => ({
     name: r.player.name,

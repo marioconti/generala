@@ -9,7 +9,7 @@ import { useGenerala } from '../../games/generala/useGenerala'
 
 export function GeneralaSetup() {
   const { game, start } = useGenerala()
-  const [names, setNames] = useState<string[]>(['', ''])
+  const [names, setNames] = useState<string[]>([])
   const navigate = useNavigate()
 
   const filled = names.map((n) => n.trim()).filter(Boolean)

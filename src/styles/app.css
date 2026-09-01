@@ -328,27 +328,78 @@ a {
 .names {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.names__list {
+/* The table being set: one counter per player, laid out as seats around it. */
+.seats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px 18px;
+  padding: 4px 0 2px;
+}
+
+.seat {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 5px;
+  width: 62px;
+  animation: deal 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.player-row {
+.seat__name {
+  max-width: 100%;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* An empty seat says "two of you, minimum" without a sentence saying it. */
+.seat--empty .seat__hole {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 1.5px dashed #c3b191;
+  opacity: 0.75;
+}
+
+.seat--empty .seat__name {
+  color: var(--ink-ghost);
+}
+
+.seat__x {
+  position: absolute;
+  top: -4px;
+  right: -2px;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 7px 10px;
-  min-height: 52px;
-  background: rgba(255, 255, 255, 0.5);
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-pill);
+  background: var(--paper-lit);
   border: 1px solid var(--paper-edge);
-  border-radius: var(--r-md);
+  color: #a8926a;
+  box-shadow: 0 1px 3px rgba(60, 40, 20, 0.18);
 }
 
-.player-row__input {
+/* A ruled line to write on, not a box to fill in. */
+.write-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 6px;
+  border-bottom: 1.5px solid var(--paper-edge);
+}
+
+.write-line__input {
   flex-grow: 1;
   min-width: 0;
   font-family: var(--mono);
@@ -358,40 +409,28 @@ a {
   background: none;
   border: none;
   outline: none;
-  padding: 4px 0;
+  padding: 8px 0;
 }
 
-.player-row__input::placeholder {
-  color: #b5a382;
+.write-line__input::placeholder {
+  color: #bfae8c;
 }
 
-.player-row__x {
+.write-line__add {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
   border-radius: var(--r-pill);
-  color: #b09a72;
+  background: var(--accent);
+  color: var(--accent-ink);
+  transition: opacity 140ms ease;
 }
 
-.add-row {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 7px 10px;
-  min-height: 52px;
-  width: 100%;
-  border: 1px dashed #c9b892;
-  border-radius: var(--r-md);
-  font-size: 14px;
-  color: #a08d68;
-}
-
-.add-row__grow {
-  flex-grow: 1;
-  text-align: left;
+.write-line__add:disabled {
+  opacity: 0.3;
 }
 
 .names__suggest {
@@ -414,6 +453,8 @@ a {
 }
 
 .name-chip {
+  display: flex;
+  align-items: center;
   padding: 7px 14px;
   min-height: 36px;
   border-radius: var(--r-pill);
@@ -1491,50 +1532,52 @@ a {
   font-weight: 600;
 }
 
-.qty-row {
+.pts-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.qty {
+/* One button per score the row can hold. The dice under the number say what
+   that score means without asking anyone to multiply. */
+.pts {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 54px;
+  gap: 5px;
+  min-height: 66px;
   border: 1.5px solid var(--paper-edge);
   border-radius: var(--r-md);
   background: rgba(255, 255, 255, 0.45);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--ink-soft);
+}
+
+.pts__value {
+  font-family: var(--display);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
-.qty--on {
+.pts__dice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 11px;
+}
+
+.pts__none {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  color: var(--ink-faint);
+}
+
+.pts--on {
   border: 2.5px solid var(--accent-deep);
   background: #fff8e6;
-  color: var(--ink);
   box-shadow: 0 2px 10px rgba(201, 158, 70, 0.3);
-}
-
-.entry__result {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 9px;
-}
-
-.entry__math {
-  font-size: 17px;
-  color: #8a9bb0;
-}
-
-.entry__points {
-  font-family: var(--display);
-  font-size: 40px;
-  line-height: 1;
-  color: var(--red);
 }
 
 .entry__actions {

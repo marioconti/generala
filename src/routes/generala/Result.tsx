@@ -1,8 +1,9 @@
 import { Navigate, useNavigate } from 'react-router-dom'
 import { playedOn, ResultCard, type Placing } from '../../components/ResultCard'
 import { Surface } from '../../components/Surface'
-import { ranking, scratchedCount, verdict, verdictNote } from '../../games/generala/rules'
+import { bandFor, ranking, scratchedCount } from '../../games/generala/rules'
 import { useGenerala } from '../../games/generala/useGenerala'
+import { pickVerdict } from '../../lib/verdicts'
 
 export function GeneralaResult() {
   const { game, rematch, reset } = useGenerala()
@@ -18,6 +19,16 @@ export function GeneralaResult() {
   const margin = rest.length > 0 ? best - rest[0].total : best
   const tied = winners.length > 1
 
+  const { verdict, note } = pickVerdict(bandFor(margin, tied), {
+    margin,
+    winner: winners[0].player.name,
+    loser: rest[0]?.player.name ?? '',
+    winnersCount: winners.length,
+    players: game.players.length,
+    scratched: scratchedCount(game, winners[0].player.id),
+    seed: game.finishedAt ?? '',
+  })
+
   const toPlacing = (r: (typeof table)[number]): Placing => ({
     name: r.player.name,
     chip: r.player.chip,
@@ -32,8 +43,8 @@ export function GeneralaResult() {
         <ResultCard
           winners={winners.map(toPlacing)}
           rest={rest.map(toPlacing)}
-          verdict={verdict(margin, tied)}
-          note={verdictNote(margin, tied, scratchedCount(game, table[0].player.id))}
+          verdict={verdict}
+          note={note}
           date={playedOn(game.finishedAt)}
         />
 
