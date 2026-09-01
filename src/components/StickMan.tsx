@@ -14,7 +14,7 @@ import {
   type Move,
   type Pose,
 } from '../lib/stickman'
-import { DANCES, IDLE, SORROWS } from '../lib/stickman-moves'
+import { DANCES, IDLE, SHOCKS, SORROWS } from '../lib/stickman-moves'
 
 interface Props {
   mood: Mood
@@ -22,12 +22,20 @@ interface Props {
   size: number
   /** Distinguishes one figure from another so they never move in unison. */
   seed: string
+  /**
+   * Bump this to make the figure react to something. Any new value interrupts
+   * whatever it was doing for one dramatic move, then hands it back.
+   */
+  shock?: number
 }
 
 const POOLS: Record<Mood, Move[]> = { dance: DANCES, sad: SORROWS, idle: IDLE }
 
 /** How long it takes to melt from one move into the next. */
 const BLEND_MS = 320
+
+/** How long a reaction holds the stage before the mood takes over again. */
+const SHOCK_MS = 2600
 
 /**
  * A per-figure offset into the loop. Two players who happen to draw the same
@@ -87,11 +95,13 @@ interface Parts {
  * next from a shuffled deck takes over, so all twenty come up before any
  * repeats.
  */
-export function StickMan({ mood, size, seed }: Props) {
+export function StickMan({ mood, size, seed, shock }: Props) {
   const svg = useRef<SVGSVGElement>(null)
   const parts = useRef<Parts | null>(null)
   const moodRef = useRef(mood)
   moodRef.current = mood
+  const shockRef = useRef(shock)
+  shockRef.current = shock
   const reduced = useReducedMotion()
 
   useEffect(() => {
@@ -145,6 +155,8 @@ export function StickMan({ mood, size, seed }: Props) {
     let from: Required<Pose> = { ...REST }
     let blendUntil = 0
     let shownMood = moodRef.current
+    let shownShock = shockRef.current
+    let reacting = false
     let current: Required<Pose> = { ...REST }
 
     const offset = phaseOffset(seed)
@@ -162,16 +174,35 @@ export function StickMan({ mood, size, seed }: Props) {
     return onFrame((now) => {
       if (!started) take(move, now, current)
 
-      // A change of mood cuts in at once — the whole point of the figure is to
-      // say who is winning right now — but it still eases out of wherever the
-      // last move left the body.
-      if (moodRef.current !== shownMood) {
+      // A reaction outranks everything: it is the answer to something that just
+      // happened, and it only gets one chance to land. Note the undefined
+      // check — the prop goes back to undefined once the drama is over, and
+      // that must not be mistaken for a second piece of bad news.
+      const incoming = shockRef.current
+      const newShock = incoming !== undefined && incoming !== shownShock
+      shownShock = incoming
+
+      if (newShock) {
+        reacting = true
+        take(SHOCKS[Math.floor(Math.random() * SHOCKS.length)], now, current)
+        endsAt = now + SHOCK_MS
+      } else if (moodRef.current !== shownMood && !reacting) {
+        // A change of mood cuts in at once — the whole point of the figure is
+        // to say who is winning right now — but it still eases out of wherever
+        // the last move left the body.
         shownMood = moodRef.current
         deck = shuffled(POOLS[shownMood])
         next = 0
         take(deck[next++], now, current)
       } else if (now >= endsAt) {
-        if (next >= deck.length) {
+        // Coming out of a reaction, pick up the mood as it stands now, which
+        // may well have changed while the figure was busy reacting.
+        if (reacting || moodRef.current !== shownMood) {
+          reacting = false
+          shownMood = moodRef.current
+          deck = shuffled(POOLS[shownMood])
+          next = 0
+        } else if (next >= deck.length) {
           deck = shuffled(deck)
           next = 0
         }

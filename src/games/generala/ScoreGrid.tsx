@@ -1,4 +1,4 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { CATEGORIES, FIRST_SPECIAL, moods, scoreOf, totalFor } from './rules'
 import type { CategoryId, Game } from './types'
 import { Chip } from '../../components/Chip'
@@ -19,25 +19,94 @@ function sizesFor(players: number) {
   return { catW: '74px', cell: '15px', name: '8px', chip: 24, catFont: '8px', catTrack: '.2px', figure: 41 }
 }
 
-function Strike() {
+/** Where the ink flies when a row is crossed out, as [dx, dy, final scale]. */
+const SPLATTER: [number, number, number][] = [
+  [-15, 9, 0.5],
+  [13, 11, 0.7],
+  [-9, -13, 0.4],
+  [17, -6, 0.55],
+  [-18, -3, 0.35],
+  [6, 15, 0.45],
+  [1, -16, 0.6],
+]
+
+/**
+ * The crossed-out row.
+ *
+ * No viewBox and no `preserveAspectRatio="none"`: that pair scaled the stroke
+ * with the column, so the line came out a different weight at two players than
+ * at six, and on a short phone the round cap pushed 5px past the bottom of its
+ * own cell into the row below. Percentages keep the line inside the box at any
+ * size, and the stroke width is now the same everywhere.
+ *
+ * `pathLength={1}` normalises the line so one dash covers it whatever the cell
+ * measures, which is what lets it draw itself in.
+ */
+function Strike({ fresh }: { fresh: boolean }) {
   return (
-    <svg className="cell__strike" viewBox="0 0 100 50" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M20 40 L80 10" stroke="var(--red)" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-    </svg>
+    <>
+      <svg className={`cell__strike${fresh ? ' cell__strike--fresh' : ''}`} aria-hidden="true">
+        <line x1="14%" y1="79%" x2="86%" y2="21%" pathLength={1} />
+      </svg>
+      {fresh && (
+        <span className="splat" aria-hidden="true">
+          {SPLATTER.map(([dx, dy, scale], i) => (
+            <i
+              key={i}
+              style={
+                {
+                  '--dx': `${dx}px`,
+                  '--dy': `${dy}px`,
+                  '--s': scale,
+                  '--delay': `${i * 16}ms`,
+                } as React.CSSProperties
+              }
+            />
+          ))}
+        </span>
+      )}
+    </>
   )
 }
 
 interface Props {
   game: Game
+  /** The row crossed out a moment ago, if any. Drives the whole performance. */
+  drama: { playerId: string; categoryId: CategoryId; at: number } | null
   onPick: (playerId: string, categoryId: CategoryId) => void
 }
 
-export function ScoreGrid({ game, onPick }: Props) {
+export function ScoreGrid({ game, drama, onPick }: Props) {
   const size = sizesFor(game.players.length)
   const mood = moods(game)
+  const sheet = useRef<HTMLDivElement>(null)
+
+  /**
+   * The shake is driven by hand rather than by a class in the render, because a
+   * CSS animation does not restart when a class it already carries is set
+   * again — and two rows crossed out inside half a second is exactly when the
+   * second one has to land. Re-keying the sheet would restart it too, but it
+   * would also tear down and rebuild every figure on the board.
+   */
+  useEffect(() => {
+    const el = sheet.current
+    if (!drama || !el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    el.classList.remove('sheet--shake')
+    void el.offsetWidth // reflow, so the animation is allowed to start over
+    el.classList.add('sheet--shake')
+
+    const done = () => el.classList.remove('sheet--shake')
+    el.addEventListener('animationend', done, { once: true })
+    return () => {
+      el.removeEventListener('animationend', done)
+      el.classList.remove('sheet--shake')
+    }
+  }, [drama?.at, drama])
 
   return (
-    <div className="sheet">
+    <div className="sheet" ref={sheet}>
       <PaperGrain />
       <div
         className="grid"
@@ -98,7 +167,13 @@ export function ScoreGrid({ game, onPick }: Props) {
                     onClick={() => onPick(player.id, category.id)}
                   >
                     {!score && <span className="cell__dot" />}
-                    {score?.kind === 'scratched' && <Strike />}
+                    {score?.kind === 'scratched' && (
+                      <Strike
+                        fresh={
+                          drama?.playerId === player.id && drama?.categoryId === category.id
+                        }
+                      />
+                    )}
                     {score && score.kind !== 'scratched' && score.points}
                   </button>
                 )
@@ -113,7 +188,12 @@ export function ScoreGrid({ game, onPick }: Props) {
             key={`total-${player.id}`}
             className={`cell cell--total${i === game.turn ? ' cell--turn' : ''}`}
           >
-            <StickMan mood={mood[i]} size={size.figure} seed={player.id} />
+            <StickMan
+              mood={mood[i]}
+              size={size.figure}
+              seed={player.id}
+              shock={drama?.playerId === player.id ? drama.at : undefined}
+            />
             <span className="cell__total-num">{totalFor(game, player.id)}</span>
           </div>
         ))}

@@ -139,6 +139,27 @@ The design targets a phone. Test it on one.
   - Every pose is checked by walking the skeleton: feet through the floor, hands
     buried in the head, anything outside the viewBox. Clipping is silent on screen,
     and eyeballing a stick figure at 40px does not catch it.
+  - Moves are also **measured**, not judged by eye. Each one is sampled over its
+    cycle for how far the hands, feet and head travel, and for how close its shape
+    comes to every other move in the pool. That is what caught a guitar solo whose
+    feet never left the ground, three dances animated entirely above the waist, and
+    four pairs that were one move under two names — `strut` and `running-man` were
+    3.9 apart, `nail-bite` and `scratch-head` 1.5.
+- **Crossing a row out is the loudest thing on the sheet**, so it behaves like it:
+  the line draws itself in, ink flies off the pen, the sheet takes the hit, and that
+  player's figure spends two and a half seconds taking it personally before going
+  back to whatever it was doing.
+  - The line is drawn in **percentages with no viewBox**. The old one used a fixed
+    viewBox with `preserveAspectRatio="none"`, which scaled the stroke with the
+    column — a different weight at two players than at six — and on a short phone
+    pushed the round cap 5px past the bottom of its own cell into the row below.
+  - An `<svg>` with no viewBox is a replaced element: without explicit `width` and
+    `height` it falls back to 300x150 and percentage coordinates resolve against
+    *that*. Missing them once drew the line right across the sheet.
+  - The shake is applied by hand rather than through a class in the render, because
+    a CSS animation does not restart when a class it already carries is set again,
+    and two rows crossed out in half a second is exactly when the second has to
+    land. Re-keying the sheet would restart it and tear down every figure with it.
 - **The closing line is picked, not composed** (`lib/verdicts.ts`). Each band of
   margin has a pool of headlines; a line that had to qualify — a clean sheet, four
   scratches, a full table — is weighted to come up three times as often, because

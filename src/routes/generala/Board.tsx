@@ -13,6 +13,16 @@ export function GeneralaBoard() {
   const { game, setScore, clearScore, undo, renamePlayer, rematch, reset } = useGenerala()
   const [picking, setPicking] = useState<{ playerId: string; categoryId: CategoryId } | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  /**
+   * The row just crossed out, and when. Only this cell gets the drama — without
+   * it every scratched row on the sheet would replay the whole performance on
+   * each reload.
+   */
+  const [drama, setDrama] = useState<{
+    playerId: string
+    categoryId: CategoryId
+    at: number
+  } | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -24,8 +34,18 @@ export function GeneralaBoard() {
   const confirm = (score: Score) => {
     if (!picking) return
     setScore(picking.playerId, picking.categoryId, score)
+    if (score.kind === 'scratched') {
+      setDrama({ ...picking, at: Date.now() })
+    }
     setPicking(null)
   }
+
+  // Long enough for the ink, the shake and the figure's reaction to finish.
+  useEffect(() => {
+    if (!drama) return
+    const timer = setTimeout(() => setDrama(null), 2800)
+    return () => clearTimeout(timer)
+  }, [drama])
 
   return (
     <Surface game="generala">
@@ -50,7 +70,11 @@ export function GeneralaBoard() {
         }
       />
 
-      <ScoreGrid game={game} onPick={(playerId, categoryId) => setPicking({ playerId, categoryId })} />
+      <ScoreGrid
+        game={game}
+        drama={drama}
+        onPick={(playerId, categoryId) => setPicking({ playerId, categoryId })}
+      />
 
       {picking && (
         <ScoreEntry

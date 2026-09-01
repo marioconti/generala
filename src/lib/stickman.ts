@@ -77,10 +77,10 @@ const FOREARM = 14
  * Measured, not guessed: `scripts` in the pose check walk every pose and flag
  * anything that lands outside this box, because clipping is silent on screen.
  */
-export const VIEW_BOX = '-38 -72 76 120'
+export const VIEW_BOX = '-46 -72 92 120'
 
 /** Width to height of VIEW_BOX, so a caller can size the figure by height. */
-export const ASPECT = 76 / 120
+export const ASPECT = 92 / 120
 
 type Point = [number, number]
 

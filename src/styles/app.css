@@ -854,9 +854,110 @@ a {
   background: rgba(217, 180, 94, 0.35);
 }
 
+/*
+ * width/height are not optional here. An <svg> with no viewBox is a replaced
+ * element: without them it falls back to its default 300x150, the percentage
+ * coordinates resolve against THAT, and the line is drawn far outside the cell.
+ * overflow:hidden is the seatbelt.
+ */
 .cell__strike {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.cell__strike line {
+  stroke: var(--red);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  fill: none;
+}
+
+/* Only the row just crossed out draws itself; the rest are simply there. */
+.cell__strike--fresh line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: strike-draw 200ms cubic-bezier(0.55, 0, 0.6, 1) forwards;
+}
+
+@keyframes strike-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Ink thrown off the pen. Short, loud, and gone. */
+.splat {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.splat i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: splat 540ms cubic-bezier(0.2, 0.8, 0.3, 1) var(--delay) both;
+}
+
+@keyframes splat {
+  from {
+    transform: translate(0, 0) scale(0.2);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) scale(var(--s));
+    opacity: 0;
+  }
+}
+
+/* The whole sheet takes the hit. */
+.sheet--shake {
+  animation: sheet-shake 460ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes sheet-shake {
+  10%,
+  90% {
+    transform: translate3d(-2px, 0, 0) rotate(-0.25deg);
+  }
+  20%,
+  80% {
+    transform: translate3d(3px, 1px, 0) rotate(0.3deg);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-5px, -1px, 0) rotate(-0.45deg);
+  }
+  40%,
+  60% {
+    transform: translate3d(5px, 1px, 0) rotate(0.4deg);
+  }
+}
+
+/* Nobody who asked for less motion gets thrown around by a scratched row. */
+@media (prefers-reduced-motion: reduce) {
+  .cell__strike--fresh line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .splat,
+  .sheet--shake {
+    animation: none;
+  }
+
+  .splat {
+    display: none;
+  }
 }
 
 .cell__dot {

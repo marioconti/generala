@@ -19,10 +19,10 @@ export const DANCES: Move[] = [
     cycle: 1600,
     ease: 'snap',
     poses: [
-      { armR: [90, 88], head: -14 },
-      { armR: [90, 88], armL: [90, 88], head: 14 },
-      { armL: [90, 88], armR: [9, 5], head: -14 },
-      { head: 0 },
+      { armR: [90, 88], head: -14, legR: [24, 0], legL: [4, 0], x: 3 },
+      { armR: [90, 88], armL: [90, 88], head: 14, legR: [4, 0], legL: [24, 0], x: -3 },
+      { armL: [90, 88], armR: [9, 5], head: -14, legR: [24, 0], legL: [4, 0], x: 3 },
+      { head: 0, legL: [10, 0], legR: [10, 0], x: 0 },
     ],
   },
   {
@@ -31,12 +31,12 @@ export const DANCES: Move[] = [
     cycle: 2000,
     ease: 'smooth',
     poses: [
-      { x: 7, torso: -5, legR: [20, 0], legL: [-12, 34], armR: [16, 10], armL: [12, 8] },
-      { x: 2, torso: -4, legR: [7, 0], legL: [4, 26] },
-      { x: -3, torso: -5, legL: [20, 0], legR: [-12, 34] },
-      { x: -7, torso: -4, legL: [7, 0], legR: [4, 26] },
-      { x: -2, torso: -3, legL: [12, 10], legR: [8, 18] },
-      { x: 3, torso: -4, legR: [14, 6], legL: [6, 12] },
+      { x: 8, torso: -6, legR: [26, 0], legL: [-16, 48], armR: [18, 12], armL: [12, 8] },
+      { x: 3, torso: -5, legR: [8, 0], legL: [2, 36] },
+      { x: -3, torso: -6, legL: [26, 0], legR: [-16, 48] },
+      { x: -8, torso: -5, legL: [8, 0], legR: [2, 36] },
+      { x: -2, torso: -4, legL: [15, 13], legR: [10, 22] },
+      { x: 4, torso: -5, legR: [17, 9], legL: [8, 15] },
     ],
   },
   {
@@ -46,10 +46,11 @@ export const DANCES: Move[] = [
     cycle: 2600,
     ease: 'smooth',
     poses: [
-      { torso: 2, armR: [14, 8], armL: [14, 8] },
-      { torso: 20, armR: [18, 6], armL: [16, 6], legL: [12, 0], legR: [2, 0] },
-      { torso: 29, armR: [20, 4], armL: [18, 4], legL: [14, 0], legR: [1, 0], head: -6 },
-      { torso: 8, armR: [14, 8], armL: [14, 8], legL: [8, 0] },
+      { torso: 2, armR: [14, 8], armL: [14, 8], legR: [16, 0], x: 3 },
+      { torso: -5, armR: [150, 96], armL: [20, 10], head: -9, x: -4, legL: [18, 0] },
+      { torso: 20, armR: [18, 6], armL: [16, 6], legL: [14, 0], legR: [2, 0], x: 2 },
+      { torso: 30, armR: [20, 4], armL: [18, 4], legL: [17, 0], legR: [1, 0], head: -6, x: 5 },
+      { torso: 5, armR: [44, 34], armL: [44, 34], legL: [8, 0], x: 0, y: -4 },
     ],
   },
   {
@@ -98,10 +99,10 @@ export const DANCES: Move[] = [
     cycle: 1200,
     ease: 'smooth',
     poses: [
-      { flip: 0.55, torso: 9, legL: [16, 22], legR: [16, 22], armR: [56, 30], armL: [24, 40], y: 3 },
-      { flip: 1, torso: 0, legL: [10, 12], legR: [10, 12], y: 0 },
-      { flip: 0.55, torso: -9, legL: [16, 22], legR: [16, 22], armL: [56, 30], armR: [24, 40], y: 3 },
-      { flip: 1, torso: 0, legL: [10, 12], legR: [10, 12], y: 0 },
+      { flip: 0.55, torso: 10, legL: [26, 30], legR: [5, 16], armR: [58, 32], armL: [24, 42], y: 4 },
+      { flip: 1, torso: 0, legL: [12, 14], legR: [12, 14], y: 0 },
+      { flip: 0.55, torso: -10, legL: [5, 16], legR: [26, 30], armL: [58, 32], armR: [24, 42], y: 4 },
+      { flip: 1, torso: 0, legL: [12, 14], legR: [12, 14], y: 0 },
     ],
   },
   {
@@ -115,11 +116,13 @@ export const DANCES: Move[] = [
   },
   {
     id: 'shuffle',
-    cycle: 720,
+    cycle: 700,
     ease: 'snap',
     poses: [
-      { legL: [30, -18], legR: [30, -18], armR: [26, 16], armL: [26, 16], y: -2 },
-      { legL: [2, 6], legR: [2, 6], armR: [12, 8], armL: [12, 8], y: 1 },
+      { legL: [42, -32], legR: [42, -32], armR: [36, 20], armL: [36, 20], y: -5, x: 3 },
+      { legL: [-8, 32], legR: [28, 8], armR: [16, 10], armL: [48, 26], y: 3, x: -3, torso: 6 },
+      { legL: [42, -32], legR: [42, -32], armR: [48, 26], armL: [16, 10], y: -5, x: -3 },
+      { legL: [28, 8], legR: [-8, 32], armR: [36, 20], armL: [36, 20], y: 3, x: 3, torso: -6 },
     ],
   },
   {
@@ -128,11 +131,11 @@ export const DANCES: Move[] = [
     cycle: 1700,
     ease: 'smooth',
     poses: [
-      { armR: [96, 60], armL: [12, 6], torso: 5 },
-      { armR: [150, 10], armL: [40, 40], torso: 2 },
-      { armR: [96, 20], armL: [96, 60], torso: -2 },
-      { armR: [40, 40], armL: [150, 10], torso: -5 },
-      { armR: [12, 6], armL: [96, 20], torso: 0 },
+      { armR: [96, 60], armL: [12, 6], torso: 5, legR: [20, 16], legL: [6, 2], y: 3 },
+      { armR: [150, 10], armL: [40, 40], torso: 2, legR: [10, 6], legL: [10, 6], y: -4 },
+      { armR: [96, 20], armL: [96, 60], torso: -2, legR: [6, 2], legL: [20, 16], y: 3 },
+      { armR: [40, 40], armL: [150, 10], torso: -5, legR: [10, 6], legL: [10, 6], y: -4 },
+      { armR: [12, 6], armL: [96, 20], torso: 0, legL: [15, 11], legR: [15, 11], y: 2 },
     ],
   },
   {
@@ -168,18 +171,19 @@ export const DANCES: Move[] = [
     cycle: 1500,
     ease: 'smooth',
     poses: [
-      { x: 7, torso: -8, legR: [18, 4], legL: [-2, 6], armR: [26, 14], armL: [16, 10] },
-      { x: -7, torso: 8, legL: [18, 4], legR: [-2, 6], armL: [26, 14], armR: [16, 10] },
+      { torso: -13, legR: [26, 6], legL: [-5, 9], armR: [32, 18], armL: [12, 8], head: 9, y: 3 },
+      { torso: 13, legL: [26, 6], legR: [-5, 9], armL: [32, 18], armR: [12, 8], head: -9, y: 3 },
     ],
   },
   {
     id: 'air-guitar',
-    cycle: 1000,
+    cycle: 900,
     ease: 'snap',
     poses: [
-      { armL: [104, 74], armR: [58, 46], torso: -8, head: -12, legR: [22, 8] },
-      { armL: [104, 74], armR: [22, 74], torso: -4, head: 8, legR: [22, 8] },
-      { armL: [104, 74], armR: [70, 30], torso: -10, head: -14, legR: [26, 12] },
+      { armL: [108, 78], armR: [70, 40], torso: -11, head: -22, legR: [32, 22], legL: [4, 0], y: -3 },
+      { armL: [108, 78], armR: [16, 80], torso: -2, head: 18, legR: [8, 0], legL: [16, 14], y: 3 },
+      { armL: [112, 86], armR: [78, 24], torso: -13, head: -26, legR: [36, 28], legL: [2, 0], y: -5 },
+      { armL: [108, 78], armR: [22, 72], torso: -3, head: 14, legR: [10, 4], legL: [18, 18], y: 2 },
     ],
   },
   {
@@ -210,19 +214,19 @@ export const DANCES: Move[] = [
     cycle: 2600,
     ease: 'snap',
     poses: [
-      { armR: [148, 22], armL: [148, 22] },
-      { armR: [96, 84], armL: [50, 96], torso: 4 },
-      { armR: [116, 62], armL: [150, 50] },
-      { armR: [162, 4], armL: [40, 84], torso: -4 },
+      { armR: [148, 22], armL: [148, 22], y: -5, legL: [14, 10], legR: [14, 10] },
+      { armR: [96, 84], armL: [50, 96], torso: 4, y: 2, legL: [8, 4], legR: [20, 14] },
+      { armR: [116, 62], armL: [150, 50], y: -4, legL: [16, 12], legR: [16, 12] },
+      { armR: [162, 4], armL: [40, 84], torso: -4, y: 2, legL: [20, 14], legR: [8, 4] },
     ],
   },
   {
     id: 'strut',
-    cycle: 1400,
+    cycle: 1500,
     ease: 'smooth',
     poses: [
-      { legR: [34, 56], legL: [-8, 4], armL: [52, 66], armR: [-16, 20], torso: 3, head: 6 },
-      { legL: [34, 56], legR: [-8, 4], armR: [52, 66], armL: [-16, 20], torso: -3, head: -6 },
+      { legR: [22, 12], legL: [-12, 6], armR: [62, 114], armL: [50, 104], torso: -8, head: 13, y: -3, x: 3 },
+      { legL: [22, 12], legR: [-12, 6], armR: [50, 104], armL: [62, 114], torso: -5, head: -13, y: -1, x: -3 },
     ],
   },
 ]
@@ -235,7 +239,8 @@ export const SORROWS: Move[] = [
     ease: 'smooth',
     poses: [
       { ...sit(88, -88), torso: 8, head: 26, armL: [42, 40], armR: [42, 40] },
-      { ...sit(88, -88), torso: 11, head: 30, armL: [40, 44], armR: [40, 44] },
+      { ...sit(88, -88), torso: 15, head: 33, armL: [34, 54], armR: [34, 54] },
+      { ...sit(88, -88), torso: 1, head: 11, armL: [50, 28], armR: [50, 28] },
     ],
   },
   {
@@ -262,8 +267,8 @@ export const SORROWS: Move[] = [
     cycle: 3200,
     ease: 'smooth',
     poses: [
-      { torso: 7, head: 22, armR: [-6, 22], armL: [-6, 22], ...sit(30, -26) },
-      { torso: 9, head: 25, armR: [-8, 26], armL: [-8, 26], ...sit(42, -38) },
+      { torso: 13, head: 24, armR: [-6, 22], armL: [-6, 22], ...sit(30, -26), x: 4 },
+      { torso: -7, head: 27, armR: [-9, 27], armL: [-9, 27], ...sit(36, -32), x: -4 },
     ],
   },
   {
@@ -281,9 +286,9 @@ export const SORROWS: Move[] = [
     cycle: 2000,
     ease: 'smooth',
     poses: [
-      { legR: [8, 0], torso: 6, head: 18, armR: [-4, 14], armL: [-4, 14] },
-      { legR: [30, -22], torso: 8, head: 20 },
-      { legR: [-6, 10], torso: 5, head: 16 },
+      { legR: [8, 0], torso: 7, head: 19, armR: [-4, 14], armL: [-4, 14] },
+      { legR: [46, -34], torso: 11, head: 23, x: -3, y: -2 },
+      { legR: [-12, 16], torso: 5, head: 15, x: 3 },
     ],
   },
   {
@@ -308,20 +313,22 @@ export const SORROWS: Move[] = [
   },
   {
     id: 'nail-bite',
-    cycle: 1500,
+    cycle: 1900,
     ease: 'smooth',
     poses: [
-      { armR: [162, 96], armL: [-8, 26], head: -14, torso: 3 },
-      { armR: [164, 100], armL: [-8, 26], head: -10, torso: 4 },
+      { armR: [162, 96], armL: [-8, 26], head: -16, torso: 3 },
+      { armR: [158, 104], armL: [-10, 30], head: -4, torso: 5, y: 2 },
+      { armR: [30, 20], armL: [-8, 26], head: 15, torso: 7, y: 3 },
+      { armL: [160, 100], armR: [-8, 24], head: -13, torso: -3 },
     ],
   },
   {
     id: 'arms-crossed',
-    cycle: 2200,
+    cycle: 1400,
     ease: 'snap',
     poses: [
-      { armR: [40, 122], armL: [40, 122], head: 8, legR: [8, 0] },
-      { armR: [40, 122], armL: [40, 122], head: 8, legR: [16, -30] },
+      { armR: [40, 122], armL: [40, 122], head: 11, legR: [10, 0], torso: 4 },
+      { armR: [40, 122], armL: [40, 122], head: 6, legR: [28, -58], torso: 2, y: -2 },
     ],
   },
   {
@@ -329,10 +336,10 @@ export const SORROWS: Move[] = [
     cycle: 2900,
     ease: 'smooth',
     poses: [
-      { head: -24, torso: -3, armR: [8, 16], armL: [8, 16] },
-      { head: 6, torso: 2 },
-      { head: 26, torso: 3 },
-      { head: 6, torso: 0 },
+      { head: -33, torso: -7, armR: [8, 16], armL: [8, 16], x: -3 },
+      { head: 8, torso: 3, armR: [15, 25], armL: [15, 25], y: 3 },
+      { head: 35, torso: 6, armR: [10, 18], armL: [10, 18], x: 3 },
+      { head: 4, torso: -2, armR: [17, 27], armL: [17, 27], y: 2 },
     ],
   },
   {
@@ -374,9 +381,10 @@ export const SORROWS: Move[] = [
     cycle: 2700,
     ease: 'smooth',
     poses: [
-      { head: -26, torso: -6, armR: [8, 12], armL: [8, 12] },
-      { head: -20, torso: -4 },
-      { head: 22, torso: 8, armR: [-6, 28], armL: [-6, 28] },
+      { torso: -15, head: -29, armR: [32, 62], armL: [10, 20], x: -3 },
+      { torso: -19, head: -33, armR: [42, 72], armL: [12, 22], x: -5 },
+      { torso: 17, head: 27, armR: [150, 100], armL: [-8, 30], x: 3 },
+      { torso: 12, head: 23, armR: [140, 96], armL: [-6, 26], x: 1 },
     ],
   },
   {
@@ -384,8 +392,8 @@ export const SORROWS: Move[] = [
     cycle: 2600,
     ease: 'smooth',
     poses: [
-      { armR: [54, 118], armL: [54, 118], head: -22, torso: -6 },
-      { armR: [54, 118], armL: [54, 118], head: 20, torso: 6 },
+      { armR: [54, 118], armL: [54, 118], head: -26, torso: -10, y: -3 },
+      { armR: [54, 118], armL: [54, 118], head: 27, torso: 11, ...sit(26, -22) },
     ],
   },
   {
@@ -403,9 +411,9 @@ export const SORROWS: Move[] = [
     cycle: 2300,
     ease: 'smooth',
     poses: [
-      { armR: [166, 76], head: -12, torso: 4 },
-      { armR: [172, 88], head: -6, torso: 2 },
-      { armR: [166, 76], head: -14, torso: 5 },
+      { armR: [168, 74], armL: [58, 112], head: -15, torso: 5, legR: [20, 0] },
+      { armR: [176, 92], armL: [58, 112], head: 9, torso: -5, legR: [6, 0] },
+      { armR: [40, 30], armL: [58, 112], head: 21, torso: 9, legL: [20, 0], y: 3 },
     ],
   },
   {
@@ -424,8 +432,8 @@ export const SORROWS: Move[] = [
     ease: 'smooth',
     tear: true,
     poses: [
-      { ...sit(78, -158), torso: 24, head: 30, armL: [-22, -76], armR: [-22, -76] },
-      { ...sit(78, -158), torso: -5, head: 32, armL: [-24, -80], armR: [-24, -80] },
+      { ...sit(84, -168), torso: 31, head: 32, armL: [-26, -84], armR: [-26, -84] },
+      { ...sit(84, -168), torso: -15, head: 34, armL: [-28, -88], armR: [-28, -88] },
     ],
   },
 ]
@@ -439,6 +447,74 @@ export const IDLE: Move[] = [
     poses: [
       { y: 0, armR: [9, 5], armL: [9, 5], head: 0 },
       { y: 2, armR: [10, 7], armL: [10, 7], head: 2 },
+    ],
+  },
+]
+
+/**
+ * The two and a half seconds after this player crosses a row out.
+ *
+ * Deliberately larger than anything else in this file — a scratched Generala is
+ * the loudest thing that happens on the sheet, and the figure should look like
+ * it took the news personally. These interrupt whatever the mood was and hand
+ * it back afterwards.
+ */
+export const SHOCKS: Move[] = [
+  {
+    // Both hands to the head, thrown backwards. The classic NO.
+    id: 'clutch',
+    cycle: 1300,
+    ease: 'bounce',
+    poses: [
+      { torso: -4, armR: [40, 20], armL: [40, 20], head: -6 },
+      { torso: -26, head: -22, armR: [166, 78], armL: [166, 78], legL: [16, 0], legR: [16, 0], y: -3 },
+      { torso: -20, head: -18, armR: [160, 86], armL: [160, 86], legL: [14, 0], legR: [14, 0] },
+      { torso: -24, head: -20, armR: [164, 80], armL: [164, 80], legL: [16, 0], legR: [16, 0] },
+    ],
+  },
+  {
+    id: 'collapse',
+    cycle: 1500,
+    ease: 'smooth',
+    poses: [
+      { torso: -8, armR: [70, 10], armL: [70, 10], head: -10 },
+      { ...sit(70, -150), torso: -14, head: -26, armR: [150, 10], armL: [150, 10] },
+      { ...sit(74, -156), torso: 10, head: 24, armR: [20, 30], armL: [20, 30] },
+      { ...sit(72, -152), torso: 6, head: 22, armR: [16, 34], armL: [16, 34] },
+    ],
+  },
+  {
+    id: 'stagger',
+    cycle: 1100,
+    ease: 'snap',
+    poses: [
+      { x: -6, torso: 14, armR: [80, 34], armL: [80, 34], legL: [30, 0], legR: [-6, 20], head: 10 },
+      { x: 5, torso: -12, armR: [92, 24], armL: [92, 24], legR: [30, 0], legL: [-6, 20], head: -8 },
+      { x: -4, torso: 9, armR: [72, 44], armL: [72, 44], legL: [24, 0], legR: [-2, 14] },
+    ],
+  },
+  {
+    // Blown clean off his feet by a piece of news.
+    id: 'blown-back',
+    cycle: 1400,
+    ease: 'bounce',
+    poses: [
+      { torso: 6, armR: [20, 10], armL: [20, 10] },
+      { torso: -30, y: -12, armR: [128, 0], armL: [128, 0], legL: [34, 30], legR: [10, 40], head: -20 },
+      { torso: -22, y: 2, armR: [104, 20], armL: [104, 20], legL: [22, 20], legR: [8, 26], head: -14 },
+      { torso: -26, y: -4, armR: [120, 10], armL: [120, 10], legL: [28, 24], legR: [9, 32], head: -18 },
+    ],
+  },
+  {
+    // Faints. Comes round. Faints again.
+    id: 'faint',
+    cycle: 1700,
+    ease: 'smooth',
+    poses: [
+      { torso: -6, armR: [40, 60], armL: [40, 60], head: -14 },
+      { torso: -18, armR: [120, 40], armL: [120, 40], head: -24, y: -4 },
+      { ...sit(86, -172), torso: 27, head: 26, armR: [40, 90], armL: [40, 90] },
+      { ...sit(88, -176), torso: 31, head: 28, armR: [30, 100], armL: [30, 100] },
     ],
   },
 ]
