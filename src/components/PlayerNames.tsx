@@ -1,10 +1,8 @@
-import { useRef, useState } from 'react'
 import { Chip } from './Chip'
 import { Icon } from './Icon'
 import { getKnownPlayers } from '../lib/history'
 
 interface Props {
-  /** Only real names — no blanks held open for players who may not exist. */
   names: string[]
   onChange: (names: string[]) => void
   min: number
@@ -12,104 +10,80 @@ interface Props {
 }
 
 /**
- * Who is playing.
+ * Name entry for a new game.
  *
- * Written as a table being set rather than a form being filled: every player is
- * a counter laid on the felt, the empty seats are drawn so the minimum is
- * visible without a sentence explaining it, and whoever has played before is
- * one tap away. There is a single line to write on, and by the third night it
- * is barely used — the counters at the bottom do the job.
+ * Offers whoever has played before as one-tap chips — by the third night nobody
+ * wants to type "Mario" and "Juan" again.
  */
 export function PlayerNames({ names, onChange, min, max }: Props) {
-  const [draft, setDraft] = useState('')
-  const input = useRef<HTMLInputElement>(null)
-
-  const taken = new Set(names.map((n) => n.trim().toLowerCase()))
+  const taken = new Set(names.map((n) => n.trim().toLowerCase()).filter(Boolean))
   const suggestions = getKnownPlayers().filter((n) => !taken.has(n.toLowerCase()))
-  const full = names.length >= max
-  const emptySeats = Math.max(0, min - names.length)
 
-  const add = (value: string) => {
-    const name = value.trim().replace(/\s+/g, ' ')
-    // Two players called the same name would be indistinguishable on the sheet.
-    if (!name || full || taken.has(name.toLowerCase())) return false
-    onChange([...names, name])
-    return true
+  const setName = (index: number, value: string) =>
+    onChange(names.map((n, i) => (i === index ? value : n)))
+
+  const addName = (value = '') => {
+    if (names.length >= max) return
+    onChange([...names, value])
   }
 
-  const remove = (index: number) => onChange(names.filter((_, i) => i !== index))
-
-  const commitDraft = () => {
-    if (add(draft)) setDraft('')
-    // Focus stays put either way, so several names go in without reaching back
-    // for the field between each one.
-    input.current?.focus()
+  const fillFirstEmpty = (value: string) => {
+    const empty = names.findIndex((n) => !n.trim())
+    if (empty === -1) addName(value)
+    else setName(empty, value)
   }
 
   return (
     <div className="names">
-      <div className="seats">
+      <div className="names__list">
         {names.map((name, i) => (
-          <div key={name} className="seat">
-            <button
-              type="button"
-              className="seat__x"
-              onClick={() => remove(i)}
-              aria-label={`Sacar a ${name}`}
-            >
-              <Icon name="close" size={13} />
-            </button>
-            <Chip chip={i} initial={name.charAt(0)} size={54} />
-            <span className="seat__name">{name}</span>
+          <div key={i} className="player-row">
+            <Chip chip={i} initial={name.charAt(0) || undefined} size={34} />
+            <input
+              className="player-row__input"
+              value={name}
+              onChange={(e) => setName(i, e.target.value)}
+              placeholder={`Jugador ${i + 1}`}
+              maxLength={14}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint={i === names.length - 1 ? 'done' : 'next'}
+              aria-label={`Nombre del jugador ${i + 1}`}
+            />
+            {names.length > min && (
+              <button
+                type="button"
+                className="player-row__x"
+                onClick={() => onChange(names.filter((_, j) => j !== i))}
+                aria-label={`Quitar jugador ${i + 1}`}
+              >
+                <Icon name="close" size={17} />
+              </button>
+            )}
           </div>
         ))}
 
-        {Array.from({ length: emptySeats }, (_, i) => (
-          <div key={`empty-${i}`} className="seat seat--empty" aria-hidden="true">
-            <div className="seat__hole" />
-            <span className="seat__name">{'\u00a0'}</span>
-          </div>
-        ))}
-      </div>
-
-      {!full && (
-        <div className="write-line">
-          <input
-            ref={input}
-            className="write-line__input"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key !== 'Enter') return
-              e.preventDefault()
-              commitDraft()
-            }}
-            placeholder={names.length === 0 ? 'Escribí un nombre' : 'Sumá a alguien'}
-            maxLength={14}
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            enterKeyHint="done"
-            aria-label="Nombre del jugador"
-          />
-          <button
-            type="button"
-            className="write-line__add"
-            onClick={commitDraft}
-            disabled={!draft.trim()}
-            aria-label="Agregar jugador"
-          >
+        {names.length < max && (
+          <button type="button" className="add-row" onClick={() => addName()}>
+            <Chip chip={names.length} size={34} />
+            <span className="add-row__grow">Agregar jugador</span>
             <Icon name="plus" size={17} />
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
-      {suggestions.length > 0 && !full && (
+      {suggestions.length > 0 && names.length < max && (
         <div className="names__suggest">
           <div className="names__suggest-label">YA JUGARON</div>
           <div className="names__chips">
-            {suggestions.slice(0, 8).map((name) => (
-              <button key={name} type="button" className="name-chip" onClick={() => add(name)}>
+            {suggestions.slice(0, 6).map((name) => (
+              <button
+                key={name}
+                type="button"
+                className="name-chip"
+                onClick={() => fillFirstEmpty(name)}
+              >
                 {name}
               </button>
             ))}

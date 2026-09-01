@@ -10,7 +10,7 @@ import { GAME_NAMES } from '../../lib/history'
 
 export function TallySetup({ variant }: { variant: TallyVariant }) {
   const { game, preset, start } = useTally(variant)
-  const [names, setNames] = useState<string[]>([])
+  const [names, setNames] = useState<string[]>(['', ''])
   const navigate = useNavigate()
 
   const filled = names.map((n) => n.trim()).filter(Boolean)

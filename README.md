@@ -119,12 +119,26 @@ The design targets a phone. Test it on one.
   which made the anotador do the multiplying in front of you — the wrong job for a
   scoresheet. The dice under each number are a reminder of what the value means, not a
   sum to work out.
-- **Nobody fills in a form to start a game.** The setup screen is a table being
-  set: each player is a counter on the felt, empty seats are drawn so the minimum
-  is visible without a sentence explaining it, and whoever has played before is one
-  tap away. There is a single line to write on, and by the third night it is barely
-  used. Suggestions deliberately show no colour — a player's counter depends on the
-  seat they take, which is not decided until they are added.
+- **Names are written on ruled lines, not into boxes.** One row per player, each a
+  rule that draws itself gold from the left as it takes focus. The mechanic is the
+  obvious one; it was the field styling that made the screen read as a form in the
+  middle of an app that is otherwise paper and counters.
+- **A stick figure stands beside every total** (`lib/stickman.ts`,
+  `lib/stickman-moves.ts`). Whoever is ahead dances, whoever is last takes it badly,
+  and anyone in between just stands there — five figures crying at once is noise
+  rather than a story. Before anyone scores nobody moves, because a dance decided by
+  seating order would be a lie.
+  - It is a **rig, not keyframes**: a move is a handful of joint-angle poses and the
+    engine interpolates. That is why forty of them fit in one readable file instead
+    of forty blocks of CSS that would all end up looking alike.
+  - Angles use one convention everywhere — 0 is down, positive turns a limb
+    *outwards* on both sides — so a symmetric pose is the same number on both arms.
+  - `sit()` exists because dropping the hip does not sit anybody down: the legs are
+    still full length, so the figure sinks through the floor. It returns the exact
+    hip drop that folding the legs buys.
+  - Every pose is checked by walking the skeleton: feet through the floor, hands
+    buried in the head, anything outside the viewBox. Clipping is silent on screen,
+    and eyeballing a stick figure at 40px does not catch it.
 - **The closing line is picked, not composed** (`lib/verdicts.ts`). Each band of
   margin has a pool of headlines; a line that had to qualify — a clean sheet, four
   scratches, a full table — is weighted to come up three times as often, because
