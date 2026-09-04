@@ -1,4 +1,4 @@
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../config'
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../config'
 import { getHistory, HISTORY_KEY, mergeHistory, type FinishedGame } from './history'
 import { onWrite } from './storage'
 
@@ -41,13 +41,13 @@ type Row = {
 }
 
 export function isSharing(): boolean {
-  return SUPABASE_URL !== '' && SUPABASE_ANON_KEY !== ''
+  return SUPABASE_URL !== '' && SUPABASE_PUBLISHABLE_KEY !== ''
 }
 
 function headers(extra: Record<string, string> = {}): Record<string, string> {
   return {
-    apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    apikey: SUPABASE_PUBLISHABLE_KEY,
+    Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
     'Content-Type': 'application/json',
     ...extra,
   }
@@ -166,6 +166,23 @@ function catchUp(): void {
   })
 }
 
+/**
+ * The first exchange of the visit: take what the table has, then hand over
+ * everything this phone has filed.
+ *
+ * The push matters as much as the pull. Without it a phone only ever uploads
+ * when it finishes a game, so one that already had a history — the phone that
+ * kept score before any of this existed, or one that was offline for a week —
+ * would sit on its games forever and the table would never learn about them.
+ * Pull first so the merge is complete before it goes up, and push even if the
+ * pull failed: being offline a moment ago is no reason to withhold them.
+ */
+function firstExchange(): void {
+  void pull()
+    .catch(() => {})
+    .then(() => runPush())
+}
+
 export function startSync(): void {
   if (typeof window === 'undefined' || !isSharing()) return
 
@@ -175,7 +192,7 @@ export function startSync(): void {
     if (key === HISTORY_KEY) pushSoon()
   })
 
-  catchUp()
+  firstExchange()
 
   // Coming back to the tab is the moment someone is most likely to be looking
   // at a history another phone has moved on from.
