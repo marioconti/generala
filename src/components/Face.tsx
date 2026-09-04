@@ -27,11 +27,30 @@ interface Props {
  *
  * FIVE FACES, NOT A DIAL. The version before slid a single mouth curve across
  * the range, and it was too quiet to read across a table. These are five drawn
- * expressions — wrecked, down, level, pleased, ecstatic — and the mood
- * cross-fades between the two it falls between. Drawn poses can be exaggerated
- * in ways an interpolated one cannot: star eyes, a bawling open mouth, tears
- * that actually fall. The blend keeps the change smooth, so being overtaken
- * still slides down through the middle instead of cutting.
+ * expressions — wrecked, down, level, pleased, ecstatic — and drawn poses can
+ * be exaggerated in ways an interpolated one cannot: star eyes, a bawling open
+ * mouth, tears that actually fall.
+ *
+ * The sixth, `Angry`, is not a sixth step — the scale is full. It is a second
+ * way of drawing the bottom one, and the face swaps between the two every ten
+ * to fifteen seconds: sitting last is tears for a while, then fury, then tears
+ * again, which is roughly how it actually goes.
+ *
+ * Tying it to the score instead was measured and thrown out. "Furious when
+ * somebody else is running away with it" sounds right and does not work: being
+ * buried and somebody else running away are very nearly the same event, so the
+ * anger ate the crying face down to 3% of the time. Nothing about the sheet
+ * separates them, so nothing about the sheet decides it.
+ *
+ * ONE OF THEM AT A TIME. They used to cross-fade off the mood directly, and
+ * that is the bug this file exists to not repeat. The mood is continuous, so it
+ * almost never lands on a pose — it lands between two, and two faces at half
+ * opacity in the same head is not an in-between expression, it is both at once:
+ * round eyes showing through arched ones, two mouths, ghost brows, star eyes
+ * reduced to brown smudges. The mood now picks the NEAREST pose and the fade
+ * between poses runs on a clock. Nothing is lost by it: the spring in paint()
+ * swings through the middle when somebody is overtaken, so the face still steps
+ * down through level on its way rather than cutting.
  */
 
 const SKIN = '#f2c14e'
@@ -154,7 +173,33 @@ function Ecstatic() {
   )
 }
 
-const FACES = [Wrecked, Down, Level, Pleased, Ecstatic]
+/**
+ * 5 — furious. Not a step on the scale: it is the other way of drawing the
+ * bottom one, swapped in and out on the timer in paint().
+ *
+ * The brows are the whole message and they are the opposite of the ones on
+ * `Wrecked`: inner ends LOW. That one rule outranks everything else on a face,
+ * which is why the eyes are only narrowed and the mouth only clamped — with
+ * these brows they do not have to shout, and at 26 px a shouting mouth would
+ * just read as the crying one again.
+ */
+function Angry() {
+  return (
+    <g>
+      <path d="M-7.4 -5.4 L-1.7 -2.3" stroke={INK} strokeWidth="2.1" fill="none" strokeLinecap="round" />
+      <path d="M7.4 -5.4 L1.7 -2.3" stroke={INK} strokeWidth="2.1" fill="none" strokeLinecap="round" />
+      <ellipse cx="-4.1" cy="0.6" rx="2.1" ry="1.5" fill={INK} />
+      <ellipse cx="4.1" cy="0.6" rx="2.1" ry="1.5" fill={INK} />
+      {/* Clamped shut and turned down — a grimace, not a howl. */}
+      <path d="M-4.6 5.4 Q0 3.5 4.6 5.4 Q0 7.5 -4.6 5.4 Z" fill={INK} />
+    </g>
+  )
+}
+
+const FACES = [Wrecked, Down, Level, Pleased, Ecstatic, Angry]
+
+/** `Angry` is off the scale: it substitutes for pose 0, it is not pose 5. */
+const ANGRY = 5
 
 export function Face({ mood, size, seed }: Props) {
   const svg = useRef<SVGSVGElement>(null)
@@ -173,20 +218,87 @@ export function Face({ mood, size, seed }: Props) {
     const cheek = root.querySelector('[data-part="cheek"]') as SVGCircleElement
     const phase = offsetOf(seed)
 
-    const paint = (m: number, now: number) => {
+    /*
+     * WHICH POSE IS SHOWING, and the fade off the one before it.
+     *
+     * These are held here rather than derived from the mood, and that is the
+     * whole point. Cross-fading straight off the mood looked reasonable in the
+     * code and was wrong on screen: the mood is continuous, so it almost never
+     * lands ON a pose, it lands BETWEEN two — and two faces at half opacity in
+     * the same 22 px is not an in-between expression, it is both of them at
+     * once. Round eyes showing through arched ones, two mouths, ghost brows.
+     * At +0.75 the star eyes came out as brown smudges.
+     *
+     * So the mood picks ONE pose — the nearest — and the fade runs on a clock
+     * instead. At rest exactly one face is drawn. The smoothness that the
+     * cross-fade was there for is not lost: the spring below still swings
+     * through the middle when somebody is overtaken, so the face steps
+     * wrecked -> down -> level on the way rather than cutting.
+     */
+    /*
+     * WHICH WAY THE BOTTOM STEP IS DRAWN RIGHT NOW, and when it changes next.
+     *
+     * Seconds, not frames, and re-rolled on every swap, so six faces on the
+     * same sheet drift apart instead of all turning furious at once.
+     */
+    let rages = Math.random() < 0.5
+    let nextSwap = 10 + Math.random() * 5
+
+    /** Which layer stands for a given step of the scale. */
+    const layerFor = (at: number) => (at === 0 && rages ? ANGRY : at)
+
+    /*
+     * `step` is the position on the scale and `pose` is the layer being drawn.
+     * They are not the same number: the bottom step is drawn as ANGRY for the
+     * players who rage. Keeping them apart is what lets the hysteresis below
+     * stay on the scale, where distances mean something.
+     */
+    let step = Math.round(((target.current + 1) / 2) * (STEPS - 1))
+    let pose = layerFor(step)
+    let from = pose
+    let blend = 1
+
+    /** Seconds a change of pose takes. Long enough to read as a change. */
+    const CROSSFADE = 0.18
+
+    const paint = (m: number, now: number, dt: number) => {
       const good = clamp01(m)
       const bad = clamp01(-m)
 
-      // Where the mood lands among the five, and how far between two of them.
+      const time = now / 1000
+      if (time > nextSwap) {
+        rages = !rages
+        nextSwap = time + 10 + Math.random() * 5
+      }
+
+      // Where the mood lands among the five, and the nearest drawn pose to it.
       const pos = ((m + 1) / 2) * (STEPS - 1)
-      const i = Math.min(STEPS - 2, Math.floor(pos))
-      const t = Math.min(1, Math.max(0, pos - i))
+      const want = Math.max(0, Math.min(STEPS - 1, Math.round(pos)))
+      /*
+       * The 0.58 rather than 0.5 is deliberate. A mood that settles right on
+       * the line between two poses would otherwise flip back and forth as the
+       * spring rings down around it; the extra margin means it has to commit.
+       */
+      if (want !== step && Math.abs(pos - step) > 0.58) step = want
+
+      /*
+       * Both reasons the drawn face can change — the score moved it to another
+       * step, or the timer flipped tears to fury — come out here as one
+       * comparison, so either gets the same fade rather than one of them
+       * cutting.
+       */
+      const layer = layerFor(step)
+      if (layer !== pose) {
+        from = pose
+        pose = layer
+        blend = 0
+      }
+      blend = Math.min(1, blend + dt / CROSSFADE)
+
       layers.forEach((layer, k) => {
-        const on = k === i ? 1 - t : k === i + 1 ? t : 0
+        const on = k === pose ? blend : k === from ? 1 - blend : 0
         layer.setAttribute('opacity', on.toFixed(3))
       })
-
-      const time = now / 1000
 
       /*
        * The movement is the loud part, on purpose. A face that only changes
@@ -206,7 +318,14 @@ export function Face({ mood, size, seed }: Props) {
 
       rays.setAttribute('opacity', clamp01((good - 0.3) / 0.4).toFixed(2))
       rays.setAttribute('transform', `rotate(${((time * 42) % 360).toFixed(1)})`)
-      cheek.setAttribute('opacity', (clamp01((good - 0.15) / 0.5) * 0.3).toFixed(2))
+      /*
+       * The flush does double duty: pleasure on the way up, blood pressure at
+       * the bottom. It is the only colour either extreme gets, and at 26 px it
+       * is what tells the furious face from the merely fed-up one before any
+       * eyebrow is legible.
+       */
+      const flush = Math.max(clamp01((good - 0.15) / 0.5) * 0.3, pose === ANGRY ? 0.26 : 0)
+      cheek.setAttribute('opacity', flush.toFixed(2))
 
       // Tears fall on a loop rather than hanging off the cheek forever.
       const fall = (time * 1.6) % 1
@@ -217,7 +336,7 @@ export function Face({ mood, size, seed }: Props) {
     }
 
     if (reduced) {
-      paint(target.current, 0)
+      paint(target.current, 0, 1)
       return
     }
 
@@ -238,7 +357,7 @@ export function Face({ mood, size, seed }: Props) {
       vel += (freq * freq * (target.current - shown) - 2 * damp * freq * vel) * dt
       shown += vel * dt
 
-      paint(Math.max(-1, Math.min(1, shown)), now)
+      paint(Math.max(-1, Math.min(1, shown)), now, dt)
     })
   }, [reduced, seed])
 

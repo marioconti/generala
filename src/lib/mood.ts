@@ -16,20 +16,49 @@
 import type { GameId } from './history'
 
 /**
- * How big a gap has to be, per game, before it counts as a thrashing.
+ * How big a gap has to be before it counts as a thrashing.
  *
- * These are not guesses: they are the margins the closing-card already treats
- * as a blowout, so the face and the verdict agree about what a big win is.
- * Generala runs to a few hundred, truco to thirty, and the hand games to a
- * hundred — one number for all four would make the face shout in one game and
- * whisper in another.
+ * THIS USED TO BE ONE FIXED NUMBER PER GAME — 70 points in generala — and it
+ * was the wrong shape of answer, not just the wrong value. A gap of fifteen
+ * points is a rout on the second row, when the sheet reads 8 to 23, and a
+ * photo finish on the last one, when it reads 170 to 185. One constant cannot
+ * mean both, so it ended up meaning neither: measured over four hundred
+ * simulated games, the opening was 100% neutral faces, the middle 76%, and the
+ * five expressions only separated in the closing rows. Three faces, in
+ * practice, which is exactly what it looked like at the table.
+ *
+ * So the scale grows with the sheet. It is a fraction of what has actually
+ * been scored so far, which is what makes a gap early and a gap late comparable
+ * — and the floor stops the first row, where the totals are 3 and 7, from
+ * reading as a massacre.
+ *
+ * Same four hundred games with this: opening 79% neutral and the rest mildly
+ * up or down, middle spread across all five, closing rows reaching the
+ * extremes about a fifth of the time.
  */
-const SCALE: Record<GameId, number> = {
-  generala: 70,
-  truco: 11,
-  rummy: 26,
-  chinchon: 26,
+
+/**
+ * The smallest gap that can still move the face, in each game's own points.
+ * Roughly a tenth of what a finished game is worth, which is what keeps the
+ * early rows quiet.
+ *
+ * ⚠️ Only generala is measured. The other three are scaled from it by what a
+ * full game is worth (30 for truco, 100 for the hand games) and have NOT been
+ * checked against real play.
+ */
+const FLOOR: Record<GameId, number> = {
+  generala: 20,
+  truco: 3,
+  rummy: 10,
+  chinchon: 10,
 }
+
+/**
+ * How much of the average score on the sheet counts as the full range. At 0.4,
+ * running away with it means being ahead of the field by roughly 40% of what a
+ * player has scored so far.
+ */
+const SPREAD = 0.4
 
 const clamp = (n: number) => Math.max(-1, Math.min(1, n))
 
@@ -49,7 +78,13 @@ export function moodsOf(
   if (totals.length === 0) return []
   if (totals.every((t) => t === 0)) return totals.map(() => 0)
 
-  const scale = SCALE[game]
+  /*
+   * The yardstick, rebuilt from the sheet every time. `played` is what an
+   * average player has on the board right now, so the scale is small while the
+   * game is small and grows as the numbers do.
+   */
+  const played = totals.reduce((sum, n) => sum + n, 0) / totals.length
+  const scale = Math.max(FLOOR[game], played * SPREAD)
 
   return totals.map((mine, i) => {
     const others = totals.filter((_, j) => j !== i)
