@@ -4,8 +4,7 @@ import type { CategoryId, Game } from './types'
 import { Chip } from '../../components/Chip'
 import { Die } from '../../components/Die'
 import { PaperGrain } from '../../components/Surface'
-import { StickMan } from '../../components/StickMan'
-import { ASPECT } from '../../lib/stickman'
+import { Face } from '../../components/Face'
 
 /**
  * Column widths and type sizes shrink with the player count so the whole sheet
@@ -119,7 +118,7 @@ export function ScoreGrid({ game, drama, onPick }: Props) {
             '--name-size': size.name,
             '--cat-font': size.catFont,
             '--cat-track': size.catTrack,
-            '--figure-w': `${Math.round(size.figure * ASPECT)}px`,
+            '--figure-w': `${size.figure}px`,
           } as React.CSSProperties
         }
       >
@@ -190,12 +189,7 @@ export function ScoreGrid({ game, drama, onPick }: Props) {
             key={`total-${player.id}`}
             className={`cell cell--total${i === game.turn ? ' cell--turn' : ''}`}
           >
-            <StickMan
-              mood={mood[i]}
-              size={size.figure}
-              seed={player.id}
-              shock={drama?.playerId === player.id ? drama.at : undefined}
-            />
+            <Face mood={mood[i]} size={size.figure} seed={player.id} />
             <span className="cell__total-num">{totalFor(game, player.id)}</span>
           </div>
         ))}

@@ -1001,7 +1001,7 @@ a {
  * side by side, and a little man leaning into the number is better company than
  * a little man shrunk to fit beside it. The paper halo keeps both readable.
  */
-.cell--total .stickman {
+.cell--total .face-figure {
   position: absolute;
   left: -1px;
   bottom: 2px;
@@ -1009,29 +1009,13 @@ a {
 }
 
 /*
- * The figure beside the total. It says who is winning at a glance, before you
- * have read a single number: gold is ahead, red is last, faded is neither.
+ * The face beside the total. It says how each player is doing before you have
+ * read a single number, and — unlike the figure it replaced — it says by how
+ * much: the expression slides all the way from destroyed to radiant.
  */
-.stickman {
+.face-figure {
   display: block;
   flex-shrink: 0;
-}
-
-/*
- * The figures used to be tinted by mood — gold for the leader, pink for last.
- * They carry their own colours now, and those say WHO rather than how it is
- * going, which is the more useful of the two on a sheet with six columns. The
- * mood still comes across, through the pose and the mouth below.
- */
-
-.stickman .face {
-  display: none;
-}
-
-.stickman--dance .face--happy,
-.stickman--sad .face--sad,
-.stickman--idle .face--flat {
-  display: inline;
 }
 
 /* ======================================================= tally (rummy etc) */

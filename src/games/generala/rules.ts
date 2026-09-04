@@ -1,4 +1,4 @@
-import type { Mood } from '../../lib/stickman'
+import { moodsOf } from '../../lib/mood'
 import type { Band } from '../../lib/verdicts'
 import type { Category, CategoryId, Game, Player, Score } from './types'
 
@@ -103,18 +103,11 @@ export function bandFor(margin: number, tied: boolean): Band {
 }
 
 /**
- * What each player's little figure is doing, by seating order.
+ * How each player is doing, by seating order, from -1 to +1.
  *
- * Whoever is on top dances and whoever is last takes it badly; anyone in
- * between just stands there, because five figures crying at once is noise
- * rather than a story. Before anyone has scored there is no leader to
- * celebrate, so nobody moves — a dance decided by seating order would be a lie.
- * A tie at the top means they all dance.
+ * Generala is won by the highest score, so the sign needs no flipping here —
+ * unlike chinchón, where it does.
  */
-export function moods(game: Game): Mood[] {
-  const totals = game.players.map((p) => totalFor(game, p.id))
-  const best = Math.max(...totals)
-  const worst = Math.min(...totals)
-  if (best === 0) return totals.map(() => 'idle')
-  return totals.map((total) => (total === best ? 'dance' : total === worst ? 'sad' : 'idle'))
+export function moods(game: Game): number[] {
+  return moodsOf(game.players.map((p) => totalFor(game, p.id)), 'generala', 'highest')
 }
