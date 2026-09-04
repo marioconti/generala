@@ -53,10 +53,22 @@ export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClear, onC
 
   const scratch = () => onConfirm({ kind: 'scratched' })
 
-  // Doble Generala without a Generala above it is unusual but not forbidden —
-  // house rules vary, so this warns and lets it through.
-  const warnDouble =
-    categoryId === 'doubleGenerala' && !scoreOf(game, playerId, 'generala')
+  /*
+   * Doble Generala only exists on top of a Generala.
+   *
+   * This used to warn and let it through, on the grounds that house rules
+   * vary. They do not vary here: asked and answered, 2026-09-04. Scoring the
+   * double without the first is not a variant, it is a mistyped 100 that
+   * quietly decides the game — so the button is gone rather than guarded by a
+   * notice nobody reads mid-game.
+   *
+   * A SCRATCHED Generala does not open it either: the row has to have been
+   * made. Crossing the double out is always allowed, which is what the player
+   * with no Generala actually needs to do with it.
+   */
+  const generala = scoreOf(game, playerId, 'generala')
+  const doubleLocked =
+    categoryId === 'doubleGenerala' && (!generala || generala.kind === 'scratched')
 
   return (
     <>
@@ -73,7 +85,11 @@ export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClear, onC
           </div>
         </div>
 
-        {warnDouble && <div className="entry__note">Ojo: todavía no anotaste Generala.</div>}
+        {doubleLocked && (
+          <div className="entry__note">
+            La doble va sobre una Generala hecha. Todavía no tenés.
+          </div>
+        )}
 
         {existing && (
           <button type="button" className="entry__clear" onClick={onClear}>
@@ -119,6 +135,7 @@ export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClear, onC
             <button
               type="button"
               className="btn-special"
+              disabled={doubleLocked}
               onClick={() => onConfirm({ kind: 'special', served: false, points: category.made })}
             >
               <span className="btn-special__label">
@@ -131,6 +148,7 @@ export function ScoreEntry({ game, playerId, categoryId, onConfirm, onClear, onC
               <button
                 type="button"
                 className="btn-special btn-special--served"
+                disabled={doubleLocked}
                 onClick={() => onConfirm({ kind: 'special', served: true, points: category.served })}
               >
                 <span className="btn-special__label">SERVIDA</span>

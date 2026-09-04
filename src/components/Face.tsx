@@ -94,14 +94,14 @@ function offsetOf(seed: string): number {
 interface Parts {
   root: SVGGElement
   mouth: SVGPathElement
+  brows: SVGGElement
   browL: SVGPathElement
   browR: SVGPathElement
-  lidL: SVGPathElement
-  lidR: SVGPathElement
+  eyeL: SVGCircleElement
+  eyeR: SVGCircleElement
   blush: SVGGElement
   shine: SVGGElement
   tear: SVGPathElement
-  gloom: SVGCircleElement
 }
 
 export function Face({ mood, size, seed }: Props) {
@@ -120,14 +120,14 @@ export function Face({ mood, size, seed }: Props) {
     parts.current = {
       root: one<SVGGElement>('root'),
       mouth: one<SVGPathElement>('mouth'),
+      brows: one<SVGGElement>('brows'),
       browL: one<SVGPathElement>('browL'),
       browR: one<SVGPathElement>('browR'),
-      lidL: one<SVGPathElement>('lidL'),
-      lidR: one<SVGPathElement>('lidR'),
+      eyeL: one<SVGCircleElement>('eyeL'),
+      eyeR: one<SVGCircleElement>('eyeR'),
       blush: one<SVGGElement>('blush'),
       shine: one<SVGGElement>('shine'),
       tear: one<SVGPathElement>('tear'),
-      gloom: one<SVGCircleElement>('gloom'),
     }
   }, [])
 
@@ -144,33 +144,43 @@ export function Face({ mood, size, seed }: Props) {
        * a flat line — one shape doing the whole range instead of three paths
        * being swapped.
        */
-      const my = lerp(4.6, m > 0 ? 3.6 : 5.9, Math.abs(m))
-      const curve = m > 0 ? lerp(0, 3.6, good) : lerp(0, -2.9, bad)
-      const wide = lerp(3.2, 4.1, good)
+      const my = lerp(4.4, m > 0 ? 3.4 : 5.8, Math.abs(m))
+      const curve = m > 0 ? lerp(0, 3.8, good) : lerp(0, -3.0, bad)
+      const wide = lerp(3.4, 4.4, good)
       p.mouth.setAttribute('d', `M${-wide} ${my.toFixed(2)} Q0 ${(my + curve).toFixed(2)} ${wide} ${my.toFixed(2)}`)
 
-      // Brows do most of the emotional work: inner ends up is grief, and the
-      // whole pair riding higher is confidence.
-      const browY = -1.6 - good * 0.9 + bad * 0.5
-      const tilt = -m * 1.5
-      p.browL.setAttribute('d', `M-5.6 ${(browY + tilt).toFixed(2)} L-1.5 ${(browY - tilt).toFixed(2)}`)
-      p.browR.setAttribute('d', `M5.6 ${(browY + tilt).toFixed(2)} L1.5 ${(browY - tilt).toFixed(2)}`)
+      /*
+       * THE EYES NEVER CLOSE.
+       *
+       * They used to: lids slid over them at both ends of the scale, and the
+       * result was a face with no eyes and two heavy brows, which reads as
+       * anger no matter what the mouth is doing. At this size the eyes ARE the
+       * face — so they stay, and they only change size: a little wider when
+       * things are going well, a little smaller when they are not.
+       */
+      const eye = lerp(1.75, m > 0 ? 2.0 : 1.45, Math.abs(m))
+      p.eyeL.setAttribute('r', eye.toFixed(2))
+      p.eyeR.setAttribute('r', eye.toFixed(2))
 
-      // A lid sliding down over each eye. Beaming squeezes them shut from
-      // below; misery closes them from above.
-      const lid = lerp(0, 1.5, Math.max(good * 0.9, bad))
-      const from = m >= 0 ? 1.4 + 1.3 - lid : 1.4 - 1.3 + lid
-      p.lidL.setAttribute('d', `M-4.4 ${from.toFixed(2)} h2.6`)
-      p.lidR.setAttribute('d', `M4.4 ${from.toFixed(2)} h-2.6`)
-      p.lidL.setAttribute('opacity', (Math.max(good, bad) > 0.35 ? 1 : 0).toString())
-      p.lidR.setAttribute('opacity', (Math.max(good, bad) > 0.35 ? 1 : 0).toString())
+      /*
+       * Brows only turn up once there is something to say. Drawn at every mood
+       * they sat over a neutral face looking cross, and two lines above two
+       * dots is most of what a small face has — spending them on nothing was
+       * what made these look angry rather than calm.
+       */
+      const strength = clamp01((Math.abs(m) - 0.3) / 0.7)
+      p.brows.setAttribute('opacity', strength.toFixed(2))
+      // Low enough to sit on skin rather than under a fringe: half the
+      // characters have hair down to the brow line, and dark brows on dark
+      // hair are brows nobody sees.
+      const browY = -1.25 - good * 0.55
+      const tilt = -m * 1.7
+      p.browL.setAttribute('d', `M-5.3 ${(browY + tilt).toFixed(2)} L-1.7 ${(browY - tilt).toFixed(2)}`)
+      p.browR.setAttribute('d', `M5.3 ${(browY + tilt).toFixed(2)} L1.7 ${(browY - tilt).toFixed(2)}`)
 
-      p.blush.setAttribute('opacity', clamp01((good - 0.25) / 0.55).toFixed(2))
-      p.shine.setAttribute('opacity', clamp01((good - 0.5) / 0.5).toFixed(2))
-      p.tear.setAttribute('opacity', clamp01((bad - 0.4) / 0.5).toFixed(2))
-      // A wash of grey over the whole head, so losing badly drains the colour
-      // out of the character rather than only bending its mouth.
-      p.gloom.setAttribute('opacity', (clamp01((bad - 0.3) / 0.7) * 0.3).toFixed(2))
+      p.blush.setAttribute('opacity', clamp01((good - 0.2) / 0.5).toFixed(2))
+      p.shine.setAttribute('opacity', clamp01((good - 0.45) / 0.45).toFixed(2))
+      p.tear.setAttribute('opacity', clamp01((bad - 0.45) / 0.45).toFixed(2))
 
       // Winning floats and swells a little; losing sinks and shrinks.
       const rise = -m * 1.4 + bob
@@ -250,18 +260,22 @@ export function Face({ mood, size, seed }: Props) {
         </g>
 
         <g fill={OUTLINE}>
-          <circle cx="-3.1" cy="1.4" r="1.25" />
-          <circle cx="3.1" cy="1.4" r="1.25" />
+          <circle data-part="eyeL" cx="-3.3" cy="1.5" r="1.75" />
+          <circle data-part="eyeR" cx="3.3" cy="1.5" r="1.75" />
+        </g>
+        {/* A catchlight in each eye. Two flat dots look dead; two dots with a
+            glint look like someone is in there. */}
+        <g fill="#fdf8ee">
+          <circle cx="-2.75" cy="0.95" r="0.6" />
+          <circle cx="3.85" cy="0.95" r="0.6" />
         </g>
 
-        <g fill="none" stroke={character.skin} strokeWidth="2.6" strokeLinecap="round">
-          <path data-part="lidL" d="" opacity="0" />
-          <path data-part="lidR" d="" opacity="0" />
+        <g data-part="brows" opacity="0" fill="none" stroke={OUTLINE} strokeLinecap="round" strokeWidth="1.4">
+          <path data-part="browL" d="" />
+          <path data-part="browR" d="" />
         </g>
 
         <g fill="none" stroke={OUTLINE} strokeLinecap="round">
-          <path data-part="browL" d="" strokeWidth="1.5" />
-          <path data-part="browR" d="" strokeWidth="1.5" />
           <path data-part="mouth" d="" strokeWidth="1.9" />
         </g>
 
@@ -270,8 +284,6 @@ export function Face({ mood, size, seed }: Props) {
         {character.face?.map((shape, i) => (
           <Piece key={`f${i}`} shape={shape} character={character} />
         ))}
-
-        <circle data-part="gloom" cx="0" cy="0" r="9.2" fill="#54606b" opacity="0" />
       </g>
     </svg>
   )
