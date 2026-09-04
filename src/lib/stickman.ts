@@ -87,6 +87,18 @@ const UPPER_ARM = 15
 const FOREARM = 14
 
 /**
+ * How thick each limb is at [root, joint, tip].
+ *
+ * Tapering is not decoration: a limb of one width has no knee and no ankle, so
+ * a bent leg reads as a folded pipe. These are the radii the outline is built
+ * from, and the joint radius is shared by both halves so they meet cleanly.
+ */
+const LEG_R: [number, number, number] = [4.8, 3.7, 2.9]
+const ARM_R: [number, number, number] = [3.6, 2.9, 2.3]
+/** Torso radius at [hip, shoulders]. Wider up top, which is where arms hang from. */
+const TORSO_R: [number, number] = [6.1, 7.4]
+
+/**
  * The whole figure lives in here, with room to jump and to throw its arms out.
  * Measured, not guessed: `scripts` in the pose check walk every pose and flag
  * anything that lands outside this box, because clipping is silent on screen.
@@ -107,8 +119,57 @@ function tip([x, y]: Point, len: number, deg: number): Point {
 const path = (points: Point[]) =>
   points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
 
+/**
+ * A limb segment as a tapered capsule: the outline of the two circles at its
+ * ends, joined by their common tangents.
+ *
+ * A stroked polyline cannot make a limb. Its width is the same at the hip and
+ * at the ankle, and the corner at the knee is a mitre — which is exactly what
+ * a hose looks like when you bend it, and exactly what these looked like. A
+ * real leg is thick at the top and thin at the bottom, and its knee is round.
+ * Drawing each bone between two radii and dropping a circle at the joint gives
+ * both, and the joint circle means the two halves meet with no seam at all.
+ */
+export function taper(a: Point, b: Point, ra: number, rb: number): string {
+  const dx = b[0] - a[0]
+  const dy = b[1] - a[1]
+  const len = Math.hypot(dx, dy)
+  // Degenerate segments happen mid-blend; a bare circle is the honest answer.
+  if (len < 0.01) {
+    const r = Math.max(ra, rb)
+    return `M${a[0]} ${a[1] - r} a${r} ${r} 0 1 0 0.01 0 Z`
+  }
+
+  // The tangents are only parallel to the segment when the radii match; the
+  // angle below is what keeps the outline touching both circles when they do
+  // not, which is the difference between a taper and a wedge with steps in it.
+  const ux = dx / len
+  const uy = dy / len
+  const dr = ra - rb
+  const cos = dr / len
+  const sin = Math.sqrt(Math.max(0, 1 - cos * cos))
+
+  const p = (cx: number, cy: number, r: number, s: 1 | -1): string => {
+    const nx = ux * cos - s * uy * sin
+    const ny = uy * cos + s * ux * sin
+    return `${(cx + r * nx * -1 + 0).toFixed(2)} ${(cy + r * ny * -1).toFixed(2)}`
+  }
+
+  const a1 = p(a[0], a[1], ra, 1)
+  const b1 = p(b[0], b[1], rb, 1)
+  const b2 = p(b[0], b[1], rb, -1)
+  const a2 = p(a[0], a[1], ra, -1)
+
+  return (
+    `M${a1} L${b1} A${rb.toFixed(2)} ${rb.toFixed(2)} 0 0 0 ${b2} ` +
+    `L${a2} A${ra.toFixed(2)} ${ra.toFixed(2)} 0 0 0 ${a1} Z`
+  )
+}
+
 export interface Skeleton {
   torso: string
+  /** The torso as a shape: narrower at the hip, wider at the shoulders. */
+  torsoShape: string
   armL: string
   armR: string
   legL: string
@@ -135,6 +196,11 @@ export interface Skeleton {
     elbowL: Point
     elbowR: Point
   }
+  /** Each limb as two tapered halves plus the circle that joins them. */
+  shapes: Record<
+    'armL' | 'armR' | 'legL' | 'legR',
+    { upper: string; lower: string; joint: Point; jointR: number }
+  >
 }
 
 /** Forward kinematics: joint angles in, the five polylines to draw out. */
@@ -163,14 +229,32 @@ export function build(pose: Required<Pose>): Skeleton {
   const legL = limb(hip, pose.legL, -1, THIGH, SHIN, 0)
   const legR = limb(hip, pose.legR, 1, THIGH, SHIN, 0)
 
+  const shape = (
+    root: Point,
+    l: { joint: Point; end: Point },
+    [r0, r1, r2]: [number, number, number],
+  ) => ({
+    upper: taper(root, l.joint, r0, r1),
+    lower: taper(l.joint, l.end, r1, r2),
+    joint: l.joint,
+    jointR: r1,
+  })
+
   return {
     torso: path([hip, neck]),
+    torsoShape: taper(hip, neck, TORSO_R[0], TORSO_R[1]),
     // Arms hang off the neck and follow the torso's lean.
     armL: armL.points,
     armR: armR.points,
     // Legs hang off the hip and stay put when the torso bends.
     legL: legL.points,
     legR: legR.points,
+    shapes: {
+      armL: shape(neck, armL, ARM_R),
+      armR: shape(neck, armR, ARM_R),
+      legL: shape(hip, legL, LEG_R),
+      legR: shape(hip, legR, LEG_R),
+    },
     head: `translate(${headCentre[0].toFixed(1)} ${headCentre[1].toFixed(1)}) rotate(${headAngle.toFixed(1)})`,
     joints: {
       hip,
@@ -317,29 +401,15 @@ function spline(p0: number, p1: number, p2: number, p3: number, t: number): numb
 }
 
 type Channel = (pose: Required<Pose>) => number
-type PairChannel = (pose: Required<Pose>) => [number, number]
 
 /**
- * How far behind the hips each part runs, as a fraction of one loop.
+ * The pose a move is AIMING at, at `elapsed` ms, looping.
  *
- * Real bodies do not move all at once: the hips lead, the shoulders follow,
- * the head arrives last. Sampling the same animation a few milliseconds late
- * for the parts further from the ground buys that overlap for nothing — no
- * pose had to be rewritten, and every move in the file got looser at once.
- */
-const LAG = {
-  torso: 0.03,
-  arms: 0.07,
-  head: 0.11,
-} as const
-
-/**
- * The pose a move is in at `elapsed` ms, looping.
- *
- * Poses share the cycle evenly and the loop is closed, so the last one flows
- * back into the first. `snap` keeps the old stepped interpolation on purpose:
- * it is what makes the robot read as a robot, and smoothing it would cost the
- * joke.
+ * This is a target, not what gets drawn — `settle` below is what the body
+ * actually does with it. Poses share the cycle evenly and the loop is closed,
+ * so the last one flows back into the first. `snap` keeps the old stepped
+ * interpolation on purpose: it is what makes the robot read as a robot, and
+ * smoothing it would cost the joke.
  */
 export function poseAt(move: Move, elapsed: number): Required<Pose> {
   const poses = move.poses
@@ -348,53 +418,147 @@ export function poseAt(move: Move, elapsed: number): Required<Pose> {
   const resolved = poses.map(resolve)
   const n = resolved.length
   const cycle = move.cycle
-  const stepped = move.ease === 'snap' || n < 3
+  const phase = ((elapsed % cycle) + cycle) % cycle
+  const step = cycle / n
+  const index = Math.floor(phase / step)
+  const raw = (phase - index * step) / step
 
-  /** Samples one channel at a phase of its own, so parts can lag behind. */
-  const at = (lag: number) => {
-    const phase = (((elapsed - lag * cycle) % cycle) + cycle) % cycle
-    const step = cycle / n
-    const index = Math.floor(phase / step)
-    const raw = (phase - index * step) / step
-
-    if (stepped) {
-      const t = EASES[move.ease](raw)
-      return (get: Channel) => lerp(get(resolved[index]), get(resolved[(index + 1) % n]), t)
-    }
-
+  let sample: (get: Channel) => number
+  if (move.ease === 'snap' || n < 3) {
+    const t = EASES[move.ease](raw)
+    sample = (get) => lerp(get(resolved[index]), get(resolved[(index + 1) % n]), t)
+  } else {
     // Wrapping the neighbours is what keeps the seam between the last pose and
     // the first as smooth as every other joint in the loop.
     const p0 = resolved[(index - 1 + n) % n]
     const p1 = resolved[index]
     const p2 = resolved[(index + 1) % n]
     const p3 = resolved[(index + 2) % n]
-    return (get: Channel) => spline(get(p0), get(p1), get(p2), get(p3), raw)
+    sample = (get) => spline(get(p0), get(p1), get(p2), get(p3), raw)
   }
 
-  const body = at(0)
-  const torso = at(LAG.torso)
-  const arms = at(LAG.arms)
-  const head = at(LAG.head)
-
-  const pair = (sample: ReturnType<typeof at>, get: PairChannel): [number, number] => [
+  const pair = (get: (p: Required<Pose>) => [number, number]): [number, number] => [
     sample((p) => get(p)[0]),
     sample((p) => get(p)[1]),
   ]
 
   return {
-    x: body((p) => p.x),
-    y: body((p) => p.y),
-    roll: body((p) => p.roll),
-    scale: body((p) => p.scale),
-    flip: body((p) => p.flip),
-    // Legs drive the body, so they stay on the beat with the hips.
-    legL: pair(body, (p) => p.legL),
-    legR: pair(body, (p) => p.legR),
-    torso: torso((p) => p.torso),
-    armL: pair(arms, (p) => p.armL),
-    armR: pair(arms, (p) => p.armR),
-    head: head((p) => p.head),
+    x: sample((p) => p.x),
+    y: sample((p) => p.y),
+    roll: sample((p) => p.roll),
+    scale: sample((p) => p.scale),
+    flip: sample((p) => p.flip),
+    torso: sample((p) => p.torso),
+    head: sample((p) => p.head),
+    armL: pair((p) => p.armL),
+    armR: pair((p) => p.armR),
+    legL: pair((p) => p.legL),
+    legR: pair((p) => p.legR),
   }
+}
+
+/* ------------------------------------------------------------------ physics */
+
+/**
+ * What the body does with the pose it is aiming at.
+ *
+ * Reading the animation straight onto the joints is what made these look like
+ * puppets: every part arrived at every keyframe at the same instant, exactly
+ * as posed, and stopped dead. Nothing on a body does that. A hand thrown
+ * upwards keeps going a little past where the arm meant to stop, and comes
+ * back; the head arrives after the shoulders because it is being carried, not
+ * driven.
+ *
+ * So each channel is a damped spring chasing the animation rather than obeying
+ * it. That buys three things at once and none of the poses had to change: the
+ * overlap between parts, the settle at the end of a movement, and the taming
+ * of poses that were written for a stick figure and are too extreme for a body
+ * with weight.
+ *
+ * The numbers are a natural frequency in rad/s and a damping ratio. Below 1
+ * the channel overshoots and comes back — which is the point — and the further
+ * a part is from the floor, the looser it is allowed to be.
+ */
+interface Tuning {
+  freq: number
+  damp: number
+}
+
+const TUNING: Record<keyof Required<Pose>, Tuning> = {
+  // The hips carry everything else, so they track the animation almost exactly.
+  x: { freq: 30, damp: 1 },
+  y: { freq: 30, damp: 1 },
+  legL: { freq: 24, damp: 0.95 },
+  legR: { freq: 24, damp: 0.95 },
+  torso: { freq: 19, damp: 0.82 },
+  armL: { freq: 14, damp: 0.68 },
+  armR: { freq: 14, damp: 0.68 },
+  // Carried by the shoulders, so it is the last thing to arrive and settle.
+  head: { freq: 11, damp: 0.6 },
+  // Whole-body effects. A spin that lagged or wobbled would read as a fault.
+  flip: { freq: 30, damp: 1 },
+  roll: { freq: 30, damp: 1 },
+  scale: { freq: 30, damp: 1 },
+}
+
+/** A pose plus the velocity every one of its channels is carrying. */
+export interface Motion {
+  pose: Required<Pose>
+  velocity: Required<Pose>
+}
+
+export function restingMotion(): Motion {
+  return {
+    pose: { ...REST, armL: [...REST.armL], armR: [...REST.armR], legL: [...REST.legL], legR: [...REST.legR] },
+    velocity: { x: 0, y: 0, torso: 0, head: 0, armL: [0, 0], armR: [0, 0], legL: [0, 0], legR: [0, 0], flip: 0, roll: 0, scale: 0 },
+  }
+}
+
+/** One channel, one step. Semi-implicit Euler: stable at the sizes used here. */
+function spring(value: number, vel: number, target: number, dt: number, t: Tuning): [number, number] {
+  const k = t.freq * t.freq
+  const c = 2 * t.damp * t.freq
+  const nextVel = vel + (k * (target - value) - c * vel) * dt
+  return [value + nextVel * dt, nextVel]
+}
+
+/**
+ * Advances the body one frame towards `target`.
+ *
+ * `dt` is clamped because a backgrounded tab hands back a gap of seconds, and
+ * an explicit integrator given a step that large does not lag — it explodes,
+ * and the figure comes back inside out.
+ */
+export function settle(motion: Motion, target: Required<Pose>, dtMs: number): Required<Pose> {
+  const dt = Math.min(dtMs, 34) / 1000
+  const { pose, velocity } = motion
+
+  const one = (key: 'x' | 'y' | 'torso' | 'head' | 'flip' | 'roll' | 'scale') => {
+    const [v, vel] = spring(pose[key], velocity[key], target[key], dt, TUNING[key])
+    pose[key] = v
+    velocity[key] = vel
+  }
+  const two = (key: 'armL' | 'armR' | 'legL' | 'legR') => {
+    for (const i of [0, 1] as const) {
+      const [v, vel] = spring(pose[key][i], velocity[key][i], target[key][i], dt, TUNING[key])
+      pose[key][i] = v
+      velocity[key][i] = vel
+    }
+  }
+
+  one('x')
+  one('y')
+  one('torso')
+  one('head')
+  one('flip')
+  one('roll')
+  one('scale')
+  two('armL')
+  two('armR')
+  two('legL')
+  two('legR')
+
+  return pose
 }
 
 /* ------------------------------------------------------------------ ticker */
