@@ -17,12 +17,32 @@ export function read<T>(key: string, isValid: (value: unknown) => boolean): T | 
   }
 }
 
+/**
+ * Called after every successful write, with the key that changed.
+ *
+ * This is the single choke point for everything the app persists, which makes
+ * it the one place to hang sharing off: when the build runs inside a Claude
+ * artifact, `shared.ts` listens here and republishes the page so the finished
+ * games travel to everyone else. On GitHub Pages nothing subscribes and the
+ * call costs nothing.
+ */
+let listener: ((key: string) => void) | null = null
+
+export function onWrite(fn: (key: string) => void): void {
+  listener = fn
+}
+
 export function write(key: string, value: unknown): void {
   try {
     if (value === null || value === undefined) localStorage.removeItem(key)
     else localStorage.setItem(key, JSON.stringify(value))
   } catch {
     // The game still works; it just won't survive a reload.
+  }
+  try {
+    listener?.(key)
+  } catch {
+    // Sharing is a bonus. It must never take the game down with it.
   }
 }
 

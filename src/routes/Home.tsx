@@ -5,7 +5,13 @@ import { Surface } from '../components/Surface'
 import { useGenerala } from '../games/generala/useGenerala'
 import { useTally } from '../games/tally/useTally'
 import { useTruco } from '../games/truco/useTruco'
-import { CHAMPION_THRESHOLD, getChampion, getStandings, type GameId } from '../lib/history'
+import {
+  CHAMPION_THRESHOLD,
+  getChampion,
+  getStandings,
+  useHistoryVersion,
+  type GameId,
+} from '../lib/history'
 
 interface Door {
   id: GameId
@@ -50,6 +56,7 @@ export function Home() {
     truco: !!truco.game && !truco.game.finishedAt && truco.game.history.length > 0,
   }
 
+  useHistoryVersion()
   const champion = getChampion()
   const standings = getStandings()
   const leader = standings[0]

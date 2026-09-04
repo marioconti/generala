@@ -2,7 +2,13 @@ import { Link } from 'react-router-dom'
 import { Icon } from '../components/Icon'
 import { playedOn } from '../components/ResultCard'
 import { Surface } from '../components/Surface'
-import { CHAMPION_THRESHOLD, getChampion, getHistory, getNemesis } from '../lib/history'
+import {
+  CHAMPION_THRESHOLD,
+  getChampion,
+  getHistory,
+  getNemesis,
+  useHistoryVersion,
+} from '../lib/history'
 
 /** Filigree for the diploma corners — four rotations of one flourish. */
 function Corner({ at }: { at: 'tl' | 'tr' | 'bl' | 'br' }) {
@@ -43,6 +49,7 @@ function Seal({ initial }: { initial: string }) {
 }
 
 export function Certificate() {
+  useHistoryVersion()
   const champion = getChampion()
 
   if (!champion) {
