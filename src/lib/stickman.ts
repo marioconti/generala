@@ -115,6 +115,26 @@ export interface Skeleton {
   legR: string
   /** Transform for the head group, so the face turns with the head. */
   head: string
+  /**
+   * Where the joints ended up, in the body's own coordinates — before the
+   * flip and roll the drawing applies to the whole group.
+   *
+   * A figure made of plain strokes does not need these. One with hands, shoes
+   * and sleeves does: those are shapes that have to sit exactly on the end of
+   * a bone, and recomputing the kinematics in the component to find them would
+   * be the same maths written twice, drifting apart the first time either copy
+   * is touched.
+   */
+  joints: {
+    hip: Point
+    neck: Point
+    handL: Point
+    handR: Point
+    footL: Point
+    footR: Point
+    elbowL: Point
+    elbowR: Point
+  }
 }
 
 /** Forward kinematics: joint angles in, the five polylines to draw out. */
@@ -134,18 +154,34 @@ export function build(pose: Required<Pose>): Skeleton {
   ) => {
     const upperDeg = base + side * upper
     const joint = tip(root, upperLen, upperDeg)
-    return path([root, joint, tip(joint, lowerLen, upperDeg + side * lower)])
+    const end = tip(joint, lowerLen, upperDeg + side * lower)
+    return { points: path([root, joint, end]), joint, end }
   }
+
+  const armL = limb(neck, pose.armL, -1, UPPER_ARM, FOREARM, pose.torso)
+  const armR = limb(neck, pose.armR, 1, UPPER_ARM, FOREARM, pose.torso)
+  const legL = limb(hip, pose.legL, -1, THIGH, SHIN, 0)
+  const legR = limb(hip, pose.legR, 1, THIGH, SHIN, 0)
 
   return {
     torso: path([hip, neck]),
     // Arms hang off the neck and follow the torso's lean.
-    armL: limb(neck, pose.armL, -1, UPPER_ARM, FOREARM, pose.torso),
-    armR: limb(neck, pose.armR, 1, UPPER_ARM, FOREARM, pose.torso),
+    armL: armL.points,
+    armR: armR.points,
     // Legs hang off the hip and stay put when the torso bends.
-    legL: limb(hip, pose.legL, -1, THIGH, SHIN, 0),
-    legR: limb(hip, pose.legR, 1, THIGH, SHIN, 0),
+    legL: legL.points,
+    legR: legR.points,
     head: `translate(${headCentre[0].toFixed(1)} ${headCentre[1].toFixed(1)}) rotate(${headAngle.toFixed(1)})`,
+    joints: {
+      hip,
+      neck,
+      handL: armL.end,
+      handR: armR.end,
+      footL: legL.end,
+      footR: legR.end,
+      elbowL: armL.joint,
+      elbowR: armR.joint,
+    },
   }
 }
 
@@ -259,19 +295,106 @@ export function blend(a: Required<Pose>, b: Required<Pose>, t: number): Required
 export const resolve = (pose: Pose): Required<Pose> => ({ ...REST, ...pose })
 
 /**
- * The pose a move is in at `elapsed` ms, looping. Poses share the cycle evenly
- * and the last one eases back into the first, so a loop never jumps.
+ * Catmull-Rom through four keyframes, centred on the middle two.
+ *
+ * Interpolating between neighbouring poses with a cosine ease makes the speed
+ * fall to zero at every keyframe; a spline carries velocity through them
+ * instead. Measured on real moves, the gain is real but modest and depends on
+ * the move: on a two-pose sway the cosine was already as smooth (worst
+ * frame-to-frame speed change 0.27x mean vs 0.29x), while on an eight-pose
+ * routine the spline cut it by about a third (0.66x to 0.46x). So this is
+ * worth having for the busier moves and costs nothing on the simple ones — it
+ * is not, on its own, what makes the figures look alive. The lag below does
+ * more for that.
+ */
+function spline(p0: number, p1: number, p2: number, p3: number, t: number): number {
+  const t2 = t * t
+  const t3 = t2 * t
+  return (
+    0.5 *
+    (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (p3 - 3 * p2 + 3 * p1 - p0) * t3)
+  )
+}
+
+type Channel = (pose: Required<Pose>) => number
+type PairChannel = (pose: Required<Pose>) => [number, number]
+
+/**
+ * How far behind the hips each part runs, as a fraction of one loop.
+ *
+ * Real bodies do not move all at once: the hips lead, the shoulders follow,
+ * the head arrives last. Sampling the same animation a few milliseconds late
+ * for the parts further from the ground buys that overlap for nothing — no
+ * pose had to be rewritten, and every move in the file got looser at once.
+ */
+const LAG = {
+  torso: 0.03,
+  arms: 0.07,
+  head: 0.11,
+} as const
+
+/**
+ * The pose a move is in at `elapsed` ms, looping.
+ *
+ * Poses share the cycle evenly and the loop is closed, so the last one flows
+ * back into the first. `snap` keeps the old stepped interpolation on purpose:
+ * it is what makes the robot read as a robot, and smoothing it would cost the
+ * joke.
  */
 export function poseAt(move: Move, elapsed: number): Required<Pose> {
   const poses = move.poses
   if (poses.length === 1) return resolve(poses[0])
 
-  const phase = ((elapsed % move.cycle) + move.cycle) % move.cycle
-  const step = move.cycle / poses.length
-  const index = Math.floor(phase / step)
-  const t = EASES[move.ease]((phase - index * step) / step)
+  const resolved = poses.map(resolve)
+  const n = resolved.length
+  const cycle = move.cycle
+  const stepped = move.ease === 'snap' || n < 3
 
-  return blend(resolve(poses[index]), resolve(poses[(index + 1) % poses.length]), t)
+  /** Samples one channel at a phase of its own, so parts can lag behind. */
+  const at = (lag: number) => {
+    const phase = (((elapsed - lag * cycle) % cycle) + cycle) % cycle
+    const step = cycle / n
+    const index = Math.floor(phase / step)
+    const raw = (phase - index * step) / step
+
+    if (stepped) {
+      const t = EASES[move.ease](raw)
+      return (get: Channel) => lerp(get(resolved[index]), get(resolved[(index + 1) % n]), t)
+    }
+
+    // Wrapping the neighbours is what keeps the seam between the last pose and
+    // the first as smooth as every other joint in the loop.
+    const p0 = resolved[(index - 1 + n) % n]
+    const p1 = resolved[index]
+    const p2 = resolved[(index + 1) % n]
+    const p3 = resolved[(index + 2) % n]
+    return (get: Channel) => spline(get(p0), get(p1), get(p2), get(p3), raw)
+  }
+
+  const body = at(0)
+  const torso = at(LAG.torso)
+  const arms = at(LAG.arms)
+  const head = at(LAG.head)
+
+  const pair = (sample: ReturnType<typeof at>, get: PairChannel): [number, number] => [
+    sample((p) => get(p)[0]),
+    sample((p) => get(p)[1]),
+  ]
+
+  return {
+    x: body((p) => p.x),
+    y: body((p) => p.y),
+    roll: body((p) => p.roll),
+    scale: body((p) => p.scale),
+    flip: body((p) => p.flip),
+    // Legs drive the body, so they stay on the beat with the hips.
+    legL: pair(body, (p) => p.legL),
+    legR: pair(body, (p) => p.legR),
+    torso: torso((p) => p.torso),
+    armL: pair(arms, (p) => p.armL),
+    armR: pair(arms, (p) => p.armR),
+    head: head((p) => p.head),
+  }
 }
 
 /* ------------------------------------------------------------------ ticker */

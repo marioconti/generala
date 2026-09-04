@@ -1015,16 +1015,14 @@ a {
 .stickman {
   display: block;
   flex-shrink: 0;
-  color: #b5a48a;
 }
 
-.stickman--dance {
-  color: var(--accent-deep);
-}
-
-.stickman--sad {
-  color: #c98a8a;
-}
+/*
+ * The figures used to be tinted by mood — gold for the leader, pink for last.
+ * They carry their own colours now, and those say WHO rather than how it is
+ * going, which is the more useful of the two on a sheet with six columns. The
+ * mood still comes across, through the pose and the mouth below.
+ */
 
 .stickman .face {
   display: none;

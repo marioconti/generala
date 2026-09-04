@@ -114,6 +114,44 @@ const BLOWOUT: Line[] = [
     note: (c) => `${c.players} jugadores y ninguno se le acercó.`,
     when: crowd,
   },
+  {
+    verdict: 'PIDAN LA HORA',
+    note: (c) => `${c.margin} de diferencia. Esto ya no es un juego, es una tarea.`,
+  },
+  {
+    verdict: 'LE PASÓ EL TREN',
+    note: (c) => `${c.loser} sigue parado en el andén con ${c.margin} de atraso.`,
+  },
+  {
+    verdict: 'AVISALE A LA FAMILIA',
+    note: (c) => `Que vayan preparando algo rico para ${c.loser}.`,
+  },
+  {
+    verdict: 'CLASE MAGISTRAL',
+    note: (c) => `${c.margin} de diferencia. Se cobra aparte.`,
+  },
+  {
+    verdict: 'NI EN PEDO',
+    note: (c) => `${c.loser} necesitaba ${c.margin} más y otra vida.`,
+  },
+  {
+    verdict: 'SE FUE AL MAZO SOLO',
+    note: (c) => `${c.margin} de ventaja. Nadie lo obligó a seguir.`,
+  },
+  {
+    verdict: 'ESTO ES BULLYING',
+    note: (c) => `${c.winner} tiene que aprender a contenerse.`,
+  },
+  {
+    verdict: 'LA MESA PIDE PIEDAD',
+    note: (c) => `${c.players} personas mirando ${c.margin} de diferencia.`,
+    when: crowd,
+  },
+  {
+    verdict: 'PERFECTO Y ENCIMA CRUEL',
+    note: (c) => `Sin una tachada y ${c.margin} de ventaja. Elegí ser así.`,
+    when: cleanSheet,
+  },
 ]
 
 const COMFORTABLE: Line[] = [
@@ -158,6 +196,39 @@ const COMFORTABLE: Line[] = [
     verdict: 'NI SE MANCHÓ',
     note: (c) => `${c.margin} de diferencia y la planilla impecable.`,
     when: cleanSheet,
+  },
+  {
+    verdict: 'SIN APURARSE',
+    note: (c) => `${c.margin} de ventaja jugando en cámara lenta.`,
+  },
+  {
+    verdict: 'LO TUVO SIEMPRE',
+    note: (c) => `Terminó ${c.margin} adelante y ni se despeinó.`,
+  },
+  {
+    verdict: 'GANÓ CHARLANDO',
+    note: (c) => `${c.margin} de diferencia mientras contaba una anécdota.`,
+  },
+  {
+    verdict: 'EL DE SIEMPRE',
+    note: (c) => `${c.winner} otra vez. ${c.loser} otra vez.`,
+  },
+  {
+    verdict: 'DIFERENCIA DE OFICIO',
+    note: (c) => `${c.margin}. No es suerte, es costumbre.`,
+  },
+  {
+    verdict: 'NO ESTUVO MAL, PERO',
+    note: (c) => `${c.loser} jugó bien. Perdió por ${c.margin} igual.`,
+  },
+  {
+    verdict: 'ADMINISTRÓ',
+    note: (c) => `Sacó ${c.margin} y se dedicó a mirar el reloj.`,
+  },
+  {
+    verdict: 'ENTRE TODOS NO PUDIERON',
+    note: (c) => `${c.players} contra uno y ganó ${c.winner} por ${c.margin}.`,
+    when: crowd,
   },
 ]
 
@@ -204,6 +275,35 @@ const CLOSE: Line[] = [
     note: (c) => `Ganó por ${c.margin} sin tachar una sola vez.`,
     when: cleanSheet,
   },
+  {
+    verdict: 'DE ESO SE TRATA',
+    note: (c) => `${c.margin} y todos con algo para reclamar.`,
+  },
+  {
+    verdict: 'GANÓ EN EL DESCUENTO',
+    note: (c) => `${c.margin} de diferencia. Un rato más y cambiaba todo.`,
+  },
+  {
+    verdict: 'LA PELEÓ',
+    note: (c) => `${c.winner} sacó ${c.margin} y los va a contar de nuevo.`,
+  },
+  {
+    verdict: 'MESA CALIENTE',
+    note: (c) => `${c.margin} entre el primero y el segundo. Nadie se ríe.`,
+  },
+  {
+    verdict: 'HUBO QUE GANARLO',
+    note: (c) => `${c.loser} no regaló nada. Perdió por ${c.margin} igual.`,
+  },
+  {
+    verdict: 'REVANCHA CANTADA',
+    note: (c) => `${c.margin} no alcanzan para irse a dormir tranquilo.`,
+  },
+  {
+    verdict: 'PARTIDO DE VERDAD',
+    note: (c) => `${c.players} jugando en serio y ${c.margin} decidiendo.`,
+    when: crowd,
+  },
 ]
 
 const PHOTO: Line[] = [
@@ -249,6 +349,35 @@ const PHOTO: Line[] = [
     note: (c) => `${c.players} en la mesa y ${c.margin} de diferencia.`,
     when: crowd,
   },
+  {
+    verdict: 'MANOTAZO DE AHOGADO',
+    note: (c) => `${c.margin}. ${c.winner} la sacó del fondo del mazo.`,
+  },
+  {
+    verdict: 'NO SE LO MERECÍA',
+    note: (c) => `Ninguno de los dos. Se definió por ${c.margin}.`,
+  },
+  {
+    verdict: 'QUE LO REPITAN',
+    note: (c) => `${c.margin} de diferencia. Alguien filme la próxima.`,
+  },
+  {
+    verdict: 'ANOTALO BIEN',
+    note: (c) => `Por ${c.margin}. Dentro de un mes nadie va a creerlo.`,
+  },
+  {
+    verdict: 'TERMINÓ DE PIE',
+    note: (c) => `${c.loser} perdió por ${c.margin} y se lo va a acordar.`,
+  },
+  {
+    verdict: 'MEDIO PUNTO DE NADA',
+    note: (c) => `${c.margin}. Eso separó ganar de perder.`,
+  },
+  {
+    verdict: 'ESO FUE SUERTE',
+    note: (c) => `${c.margin} de ventaja y ${c.scratched} tachadas. Que no se ilusione.`,
+    when: scratchedAtLeast(2),
+  },
 ]
 
 const TIED: Line[] = [
@@ -268,6 +397,18 @@ const TIED: Line[] = [
   {
     verdict: 'ASÍ NO VALE',
     note: (c) => `${c.winnersCount} en la punta. Jueguen otra y no molesten.`,
+  },
+  { verdict: 'NADIE SE VA A CASA', note: () => 'Otra mano y lo arreglan.' },
+  {
+    verdict: 'HASTA PARA ESO EMPATARON',
+    note: (c) => `${c.winnersCount} con el mismo número. Insoportables.`,
+  },
+  { verdict: 'CULPA DE LA PLANILLA', note: () => 'Revisen las cuentas antes de acusarse.' },
+  { verdict: 'SE LAVARON LAS MANOS', note: () => 'Ninguno queda como el mejor. Ni como el peor.' },
+  {
+    verdict: 'MESA DIVIDIDA',
+    note: (c) => `${c.players} jugaron y ${c.winnersCount} terminaron iguales.`,
+    when: crowd,
   },
 ]
 
