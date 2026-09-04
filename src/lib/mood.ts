@@ -55,11 +55,17 @@ export function moodsOf(
     const others = totals.filter((_, j) => j !== i)
     if (others.length === 0) return 0
 
-    // Measured against the best of the REST, so exactly one player can be ahead.
-    // Against the field average everybody in a six-player game would look
-    // roughly fine, which is not how it feels to be fourth.
-    const best = winnerIs === 'highest' ? Math.max(...others) : Math.min(...others)
-    const lead = winnerIs === 'highest' ? mine - best : best - mine
+    /*
+     * Measured against the AVERAGE of the rest, not the leader.
+     *
+     * Against the leader every player who is not winning sinks: with six on
+     * the sheet that put three of them on the crying face, and the person
+     * lying third is not crying. The average spreads them out the way the
+     * table actually feels — the leader still comes out highest, because
+     * nobody can be further above the average than the person on top.
+     */
+    const field = others.reduce((sum, n) => sum + n, 0) / others.length
+    const lead = winnerIs === 'highest' ? mine - field : field - mine
     return clamp(lead / scale)
   })
 }
