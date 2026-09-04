@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from 'react'
 import { makeId, read, write } from './storage'
 
 export type GameId = 'generala' | 'rummy' | 'chinchon' | 'truco'
@@ -12,6 +13,18 @@ export const GAME_NAMES: Record<GameId, string> = {
 /** Wins needed to become Campeón Supremo del Máximo — and win the ice cream. */
 export const CHAMPION_THRESHOLD = 15
 
+/**
+ * Per-player counters a finished game contributes to the trophy cabinet,
+ * keyed by player name and then by counter — 'generala', 'served', 'scratched'.
+ *
+ * Only Generala fills this in; the other games have nothing to count that the
+ * scores do not already say. It is optional because games recorded before the
+ * cabinet existed have none, and there is no way to reconstruct it: the sheet
+ * is thrown away when a game is filed. Those games simply do not count toward
+ * the trophies that read it.
+ */
+export type Feats = Record<string, Record<string, number>>
+
 export interface FinishedGame {
   id: string
   game: GameId
@@ -19,6 +32,13 @@ export interface FinishedGame {
   players: { name: string; score: number }[]
   /** More than one on a draw; nobody gets a win credited then. */
   winners: string[]
+  feats?: Feats
+  /**
+   * When this entry was last written. Only used to settle which copy wins when
+   * the same game arrives from two phones. Absent on games filed before the
+   * table was shared — those lose to any dated copy, which is what we want.
+   */
+  updatedAt?: string
 }
 
 export interface Standing {
@@ -29,10 +49,11 @@ export interface Standing {
   byGame: Record<GameId, number>
 }
 
-const KEY = 'anotador.history.v1'
+export const HISTORY_KEY = 'anotador.history.v1'
+const KEY = HISTORY_KEY
 
 /** "Mario" and "mario" are the same person. */
-function normalize(name: string): string {
+export function normalize(name: string): string {
   return name.trim().toLowerCase()
 }
 
@@ -45,6 +66,42 @@ export function getHistory(): FinishedGame[] {
 }
 
 /**
+ * Anyone reading the history needs to hear about it changing under them.
+ *
+ * Until now every change came from a tap on this phone, so re-rendering fell
+ * out of navigation for free. Games can now also arrive from the shared table
+ * while a screen is already open, and a standings list that quietly goes stale
+ * is worse than one that was never there.
+ */
+const listeners = new Set<() => void>()
+let version = 0
+
+function announce(): void {
+  version += 1
+  listeners.forEach((listener) => listener())
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+/**
+ * Re-renders the calling component whenever the filed games change — from this
+ * phone or from another one. The number itself means nothing; only that it is
+ * different from last time.
+ */
+export function useHistoryVersion(): number {
+  return useSyncExternalStore(
+    subscribe,
+    () => version,
+    () => version,
+  )
+}
+
+/**
  * Records a finished game. A draw is stored with every tied name in `winners`
  * but credits no win — the ice cream is not settled by a tie.
  */
@@ -52,6 +109,7 @@ export function recordGame(
   game: GameId,
   players: { name: string; score: number }[],
   winners: string[],
+  feats?: Feats,
 ): FinishedGame {
   const entry: FinishedGame = {
     id: makeId('g'),
@@ -59,8 +117,11 @@ export function recordGame(
     finishedAt: new Date().toISOString(),
     players,
     winners,
+    updatedAt: new Date().toISOString(),
+    ...(feats ? { feats } : {}),
   }
   write(KEY, [...getHistory(), entry])
+  announce()
   return entry
 }
 
@@ -75,16 +136,57 @@ export function amendGame(
   id: string,
   players: { name: string; score: number }[],
   winners: string[],
+  feats?: Feats,
 ): void {
   const history = getHistory()
   const index = history.findIndex((entry) => entry.id === id)
   if (index === -1) return
-  history[index] = { ...history[index], players, winners }
+  // A correction can change how many generalas someone ended up with, so the
+  // counters are rewritten too — but an amendment that carries none leaves the
+  // ones already filed alone rather than erasing them.
+  history[index] = {
+    ...history[index],
+    players,
+    winners,
+    updatedAt: new Date().toISOString(),
+    ...(feats ? { feats } : {}),
+  }
   write(KEY, history)
+  announce()
+}
+
+/**
+ * Folds games that arrived from another phone into the ones filed here.
+ *
+ * Games are unioned by id — two phones scoring different games never collide,
+ * because each entry got its own id when it was filed. When the same game
+ * arrives twice, the copy written last wins; a copy with no date loses to one
+ * that has it, since only the shared build stamps them.
+ *
+ * Returns true when the local file actually changed, so the caller can tell a
+ * real update from a no-op and avoid republishing what everyone already has.
+ */
+export function mergeHistory(incoming: FinishedGame[]): boolean {
+  const local = getHistory()
+  const byId = new Map<string, FinishedGame>()
+
+  for (const entry of [...local, ...incoming]) {
+    if (!entry || typeof entry.id !== 'string') continue
+    const current = byId.get(entry.id)
+    if (!current || (entry.updatedAt ?? '') > (current.updatedAt ?? '')) byId.set(entry.id, entry)
+  }
+
+  const merged = [...byId.values()].sort((a, b) => a.finishedAt.localeCompare(b.finishedAt))
+  if (JSON.stringify(merged) === JSON.stringify(local)) return false
+
+  write(KEY, merged)
+  announce()
+  return true
 }
 
 export function clearHistory(): void {
   write(KEY, null)
+  announce()
 }
 
 export function getStandings(): Standing[] {

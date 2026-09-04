@@ -1,4 +1,4 @@
-import { amendGame, recordGame } from '../../lib/history'
+import { amendGame, recordGame, type Feats } from '../../lib/history'
 import { makeId } from '../../lib/storage'
 import { createStore, useStore } from '../../lib/store'
 import { CATEGORIES, isComplete, ranking } from './rules'
@@ -23,6 +23,38 @@ function newGame(names: string[]): Game {
   }
 }
 
+/**
+ * What the trophy cabinet reads off a finished sheet, by player name.
+ *
+ * The sheet itself is not kept once a game is filed, so anything the trophies
+ * want to count has to be counted here or lost. Note that GENERALA and DOBLE
+ * have no served bonus at this table, so the entry screen never offers the
+ * served button for them: `served` counts escaleras, fulls and pókers only.
+ */
+function featsOf(game: Game): Feats {
+  const feats: Feats = {}
+
+  for (const player of game.players) {
+    const sheet = game.scores[player.id] ?? {}
+    const counters: Record<string, number> = {}
+
+    for (const categoryId of Object.keys(sheet) as CategoryId[]) {
+      const score = sheet[categoryId]
+      if (!score) continue
+      if (score.kind === 'scratched') {
+        counters.scratched = (counters.scratched ?? 0) + 1
+      } else if (score.kind === 'special') {
+        counters[categoryId] = (counters[categoryId] ?? 0) + 1
+        if (score.served) counters.served = (counters.served ?? 0) + 1
+      }
+    }
+
+    feats[player.name] = counters
+  }
+
+  return feats
+}
+
 export function useGenerala() {
   const game = useStore(store)
 
@@ -34,9 +66,10 @@ export function useGenerala() {
     const standings = ranking(next).map((r) => ({ name: r.player.name, score: r.total }))
     const best = standings[0].score
     const winners = standings.filter((s) => s.score === best).map((s) => s.name)
+    const feats = featsOf(next)
 
-    if (next.recordId) amendGame(next.recordId, standings, winners)
-    const entry = next.recordId ? null : recordGame('generala', standings, winners)
+    if (next.recordId) amendGame(next.recordId, standings, winners, feats)
+    const entry = next.recordId ? null : recordGame('generala', standings, winners, feats)
     return {
       ...next,
       finishedAt: new Date().toISOString(),

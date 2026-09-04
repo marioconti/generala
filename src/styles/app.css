@@ -2057,6 +2057,236 @@ a {
   color: var(--ink-ghost);
 }
 
+/* ================================================== games left unfinished */
+/*
+ * The track here is felt green, not the gold of the championship: a game still
+ * on the table has not paid out anything yet.
+ */
+
+.pend {
+  display: flex;
+  flex-direction: column;
+}
+
+.pend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  color: var(--ink-faint);
+  text-decoration: none;
+  text-align: left;
+}
+
+.pend-row:last-child {
+  border-bottom: none;
+}
+
+.pend-row:active {
+  opacity: 0.72;
+}
+
+.pend-row__body {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pend-row__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pend-row__game {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pend-row__who {
+  font-size: 10px;
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pend-row__track {
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.pend-row__fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  /* The deep end of the felt: a mid green reads as almost nothing on cream. */
+  background: linear-gradient(90deg, var(--mat), var(--mat-deep));
+}
+
+.pend-row__sub {
+  font-size: 9.5px;
+  color: var(--ink-ghost);
+}
+
+.pend-row__sub strong {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.pend-row__when {
+  display: block;
+  margin-top: 2px;
+  font-size: 8.5px;
+  color: var(--ink-ghost);
+}
+
+/* ================================================================ trophies */
+
+.trophies {
+  display: flex;
+  flex-direction: column;
+}
+
+.trophy {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.trophy:last-child {
+  border-bottom: none;
+}
+
+.trophy__badge {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: rgba(226, 176, 84, 0.22);
+  border: 1.5px solid var(--accent-deep);
+  color: var(--accent-deep);
+}
+
+.trophy__body {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.trophy__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.trophy__blurb {
+  font-size: 9.5px;
+  line-height: 1.5;
+  color: var(--ink-ghost);
+  margin-top: 1px;
+}
+
+.trophy__who {
+  flex-shrink: 0;
+  max-width: 40%;
+  text-align: right;
+}
+
+.trophy__holder {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trophy__value {
+  display: block;
+  font-size: 9px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
+}
+
+/* Nobody has earned it yet — still on the shelf, waiting. */
+.trophy--open .trophy__badge {
+  background: transparent;
+  border-color: var(--ink-ghost);
+  border-style: dashed;
+  color: var(--ink-ghost);
+}
+
+.trophy--open .trophy__name {
+  color: var(--ink-soft);
+}
+
+.trophy__none {
+  font-size: 10px;
+  font-style: italic;
+  color: var(--ink-ghost);
+}
+
+/* =============================================================== the kings */
+
+.kings {
+  display: flex;
+  flex-direction: column;
+}
+
+.king {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 8px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-soft);
+  font-size: 11px;
+}
+
+.king:last-child {
+  border-bottom: none;
+}
+
+.king__game {
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.king__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.king__wins {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+}
+
+.king--open .king__name {
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-ghost);
+}
+
 /* ============================================================= certificate */
 
 .cert {
