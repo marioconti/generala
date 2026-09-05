@@ -73,6 +73,29 @@ export function scratchedCount(game: Game, playerId: string): number {
   return Object.values(sheet).filter((s) => s.kind === 'scratched').length
 }
 
+/**
+ * What a player actually pulled off, for the closing card.
+ *
+ * Only the rows that are worth a sentence. A scratched row is not a feat and
+ * is counted by `scratchedCount`; GENERALA and DOBLE have no served bonus at
+ * this table, so `served` can only ever come from escalera, full and póker.
+ */
+export function featsOf(
+  game: Game,
+  playerId: string,
+): { generalas: number; doble: boolean; served: number } {
+  const sheet = game.scores[playerId] ?? {}
+  const scored = (id: CategoryId) => {
+    const s = sheet[id]
+    return s !== undefined && s.kind !== 'scratched'
+  }
+  return {
+    generalas: (scored('generala') ? 1 : 0) + (scored('doubleGenerala') ? 1 : 0),
+    doble: scored('doubleGenerala'),
+    served: Object.values(sheet).filter((s) => s.kind === 'special' && s.served).length,
+  }
+}
+
 /** The sheet is done when every player has filled every row. */
 export function isComplete(game: Game): boolean {
   return game.players.every((p) => filledCount(game, p.id) === CATEGORIES.length)

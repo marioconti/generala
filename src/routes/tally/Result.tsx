@@ -4,6 +4,7 @@ import { Surface } from '../../components/Surface'
 import { ranking, type TallyVariant } from '../../games/tally/rules'
 import { useTally } from '../../games/tally/useTally'
 import { GAME_NAMES } from '../../lib/history'
+import { historyFactsOf } from '../../lib/verdict-facts'
 import { pickVerdict, type Band } from '../../lib/verdicts'
 
 /**
@@ -31,14 +32,28 @@ export function TallyResult({ variant }: { variant: TallyVariant }) {
   const rest = table.filter((r) => r.total !== best)
   const margin = rest.length > 0 ? Math.abs(rest[0].total - best) : 0
   const { verdict, note } = pickVerdict(bandFor(margin, winners.length > 1), {
+    ...historyFactsOf(
+      variant,
+      winners[0].player.name,
+      rest[0]?.player.name ?? '',
+      game.recordId,
+    ),
     margin,
     winner: winners[0].player.name,
     loser: rest[0]?.player.name ?? '',
     winnersCount: winners.length,
     players: game.players.length,
     // Nothing to scratch in these games — null, not 0, or the card would
-    // congratulate the winner for never doing something impossible here.
+    // congratulate the winner for never doing something impossible here. The
+    // same goes for every generala row below: these games have none.
     scratched: null,
+    winnerScore: best,
+    loserScore: rest[0]?.total ?? 0,
+    generalas: null,
+    doble: false,
+    served: null,
+    loserGeneralas: null,
+    loserScratched: null,
     seed: game.finishedAt ?? '',
   })
 

@@ -1,8 +1,9 @@
 import { Navigate, useNavigate } from 'react-router-dom'
 import { playedOn, ResultCard, type Placing } from '../../components/ResultCard'
 import { Surface } from '../../components/Surface'
-import { bandFor, ranking, scratchedCount } from '../../games/generala/rules'
+import { bandFor, featsOf, ranking, scratchedCount } from '../../games/generala/rules'
 import { useGenerala } from '../../games/generala/useGenerala'
+import { historyFactsOf } from '../../lib/verdict-facts'
 import { pickVerdict } from '../../lib/verdicts'
 
 export function GeneralaResult() {
@@ -19,13 +20,28 @@ export function GeneralaResult() {
   const margin = rest.length > 0 ? best - rest[0].total : best
   const tied = winners.length > 1
 
+  const champion = winners[0].player
+  const runnerUp = rest[0]?.player ?? null
+  const mine = featsOf(game, champion.id)
+  const theirs = runnerUp ? featsOf(game, runnerUp.id) : null
+
   const { verdict, note } = pickVerdict(bandFor(margin, tied), {
+    // Everything the history knows about these two. Excludes this game, which
+    // is already filed by the time the card renders.
+    ...historyFactsOf('generala', champion.name, runnerUp?.name ?? '', game.recordId),
     margin,
-    winner: winners[0].player.name,
-    loser: rest[0]?.player.name ?? '',
+    winner: champion.name,
+    loser: runnerUp?.name ?? '',
     winnersCount: winners.length,
     players: game.players.length,
-    scratched: scratchedCount(game, winners[0].player.id),
+    scratched: scratchedCount(game, champion.id),
+    winnerScore: best,
+    loserScore: rest[0]?.total ?? 0,
+    generalas: mine.generalas,
+    doble: mine.doble,
+    served: mine.served,
+    loserGeneralas: theirs?.generalas ?? null,
+    loserScratched: runnerUp ? scratchedCount(game, runnerUp.id) : null,
     seed: game.finishedAt ?? '',
   })
 

@@ -17,11 +17,30 @@
  * being the verdict of that game.
  */
 
+import type { HistoryFacts } from './verdict-facts'
+
 export type Band = 'tied' | 'blowout' | 'comfortable' | 'close' | 'photo'
 
-export interface VerdictContext {
+export interface VerdictContext extends HistoryFacts {
   /** Always positive: the gap between first and second, whatever the game. */
   margin: number
+  /**
+   * The two totals as they appear on the sheet. Only compare them in a line
+   * gated to generala: chinchón and rummy are won by the LOWEST, so "no llegó
+   * ni a la mitad" is backwards there.
+   */
+  winnerScore: number
+  loserScore: number
+  /**
+   * Rows the WINNER filled with each of these, or null in a game that has no
+   * such row. Null and 0 differ the same way `scratched` does.
+   */
+  generalas: number | null
+  doble: boolean
+  served: number | null
+  /** The runner-up's, for the lines that are about what they did, not lost. */
+  loserGeneralas: number | null
+  loserScratched: number | null
   winner: string
   /** The runner-up. Empty when everyone tied, so tied lines never use it. */
   loser: string
@@ -56,6 +75,41 @@ const scratchedAtLeast = (n: number) => (c: VerdictContext) =>
   c.scratched !== null && c.scratched >= n
 const cleanSheet = (c: VerdictContext) => c.scratched === 0
 const crowd = (c: VerdictContext) => c.players >= 4
+
+/* ---------------------------------------------------- what the sheet did */
+
+const generala = (c: VerdictContext) => (c.generalas ?? 0) > 0
+const twoGeneralas = (c: VerdictContext) => (c.generalas ?? 0) >= 2
+const doble = (c: VerdictContext) => c.doble
+const loserGenerala = (c: VerdictContext) => (c.loserGeneralas ?? 0) > 0
+const servedTwo = (c: VerdictContext) => (c.served ?? 0) >= 2
+const loserScratchedAtLeast = (n: number) => (c: VerdictContext) =>
+  c.loserScratched !== null && c.loserScratched >= n
+/** Generala only — see the note on `winnerScore`. */
+const doubled = (c: VerdictContext) =>
+  c.generalas !== null && c.loserScore > 0 && c.loserScore * 2 <= c.winnerScore
+
+/* ------------------------------------------------ what the history knows */
+
+const dryFor = (n: number) => (c: VerdictContext) =>
+  !c.winnerFirstWin && (c.winnerDrought ?? 0) >= n
+const firstEver = (c: VerdictContext) => c.winnerFirstWin
+const streakOf = (n: number) => (c: VerdictContext) => c.winnerStreak >= n
+const loserDryFor = (n: number) => (c: VerdictContext) =>
+  !c.loserNeverWon && (c.loserDrought ?? 0) >= n
+const loserNeverWon = (c: VerdictContext) => c.loserNeverWon
+/** The winner owns this head-to-head and it is not close. */
+const owns = (c: VerdictContext) => !!c.h2h && c.h2h.wins >= 4 && c.h2h.wins > c.h2h.losses * 2
+/** Beaten by this person every time until now. */
+const finallyBeatThem = (c: VerdictContext) =>
+  !!c.h2h && c.h2h.wins === 0 && c.h2h.losses >= 3
+const deadEven = (c: VerdictContext) =>
+  !!c.h2h && c.h2h.wins >= 3 && c.h2h.wins === c.h2h.losses
+const rivalry = (n: number) => (c: VerdictContext) =>
+  !!c.h2h && c.h2h.wins + c.h2h.losses >= n
+
+/** Games, in the plural the note needs. */
+const games = (n: number) => (n === 1 ? '1 partida' : `${n} partidas`)
 
 const BLOWOUT: Line[] = [
   {
@@ -412,12 +466,292 @@ const TIED: Line[] = [
   },
 ]
 
+/* ======================================================================== *
+ * THE HISTORY-AWARE SET.
+ *
+ * Kept apart from the pools above rather than merged into them, because these
+ * are the lines that can go quiet: a line about a four-game drought is not
+ * eligible on a table's first night, and one about a head-to-head needs the
+ * pair to have played before. Grouping them makes it obvious which half of the
+ * card only wakes up once the phone has some games on it.
+ *
+ * Every number in here is counted in verdict-facts.ts, never estimated, and a
+ * draw is never called a win.
+ * ======================================================================== */
+
+const BLOWOUT_EXTRA: Line[] = [
+  {
+    verdict: 'Y ENCIMA GENERALA',
+    note: (c) => `${c.margin} de diferencia y encima se dio el gusto. Insoportable.`,
+    when: generala,
+  },
+  {
+    verdict: 'DOBLE Y A OTRA COSA',
+    note: (c) => `Cien puntos de una sola fila. ${c.loser} ya sabía en ese momento.`,
+    when: doble,
+  },
+  {
+    verdict: 'DOS GENERALAS',
+    note: () => 'Dos. En la misma planilla. Que alguien revise esos dados.',
+    when: twoGeneralas,
+  },
+  {
+    verdict: 'NI LA MITAD',
+    note: (c) => `${c.winnerScore} contra ${c.loserScore}. No es una derrota, es otra escala.`,
+    when: doubled,
+  },
+  {
+    verdict: 'SIGUE LA RACHA',
+    note: (c) => `${c.winnerStreak} al hilo. Alguien tiene que hacer algo.`,
+    when: streakOf(3),
+  },
+  {
+    verdict: 'ESTO YA ES UN PROBLEMA',
+    note: (c) => `${c.winnerStreak} partidas seguidas. Empiecen a sospechar.`,
+    when: streakOf(5),
+  },
+  {
+    verdict: 'VOLVIÓ DE LA MUERTE',
+    note: (c) => `Venía de ${games(c.winnerDrought ?? 0)} sin ganar y arrancó con esto.`,
+    when: dryFor(4),
+  },
+  {
+    verdict: 'LA PRIMERA ES ASÍ',
+    note: (c) => `Primera que gana ${c.winner}, y la ganó de esta manera. Mala señal.`,
+    when: firstEver,
+  },
+  {
+    verdict: 'LO TIENE DE HIJO',
+    note: (c) => `${c.h2h!.wins} a ${c.h2h!.losses} en el historial. Hoy no fue la excepción.`,
+    when: owns,
+  },
+  {
+    verdict: 'SE ROMPIÓ LA MALDICIÓN',
+    note: (c) =>
+      `${c.h2h!.losses} veces le ganó ${c.loser}. La primera que se da vuelta, se da vuelta así.`,
+    when: finallyBeatThem,
+  },
+  {
+    verdict: 'QUE PRUEBE OTRO JUEGO',
+    note: (c) => `${c.loser} lleva ${games(c.loserDrought ?? 0)} sin ganar una.`,
+    when: loserDryFor(4),
+  },
+  {
+    verdict: 'TODAVÍA NADA',
+    note: (c) => `${c.loser} sigue sin ganar ninguna. Hoy tampoco era.`,
+    when: loserNeverWon,
+  },
+  {
+    verdict: 'HIZO GENERALA Y PERDIÓ IGUAL',
+    note: (c) => `${c.loser} se sacó la generala y quedó ${c.margin} atrás. Eso duele distinto.`,
+    when: (c) => loserGenerala(c) && (c.generalas ?? 0) === 0,
+  },
+  {
+    verdict: 'CON LA MANO ABIERTA',
+    note: (c) => `${c.served} servidas. Ni siquiera tuvo que insistir.`,
+    when: servedTwo,
+  },
+  {
+    verdict: 'TACHÓ Y NI ASÍ',
+    note: (c) => `${c.loserScratched} filas tachó ${c.loser}, y no estuvo cerca en ningún momento.`,
+    when: loserScratchedAtLeast(3),
+  },
+]
+
+const COMFORTABLE_EXTRA: Line[] = [
+  {
+    verdict: 'LA GENERALA DECIDIÓ',
+    note: (c) => `Ganó por ${c.margin} y ahí adentro hay 50 de una sola fila.`,
+    when: generala,
+  },
+  {
+    verdict: 'EL DOBLE HIZO EL TRABAJO',
+    note: () => 'Cien de una fila. El resto de la planilla fue acompañar.',
+    when: doble,
+  },
+  {
+    verdict: 'TRES AL HILO',
+    note: (c) => `${c.winnerStreak} seguidas. Ya no es suerte, es una costumbre.`,
+    when: streakOf(3),
+  },
+  {
+    verdict: 'DEJÓ DE PERDER',
+    note: (c) => `${games(c.winnerDrought ?? 0)} sin ganar, y hoy cortó.`,
+    when: dryFor(3),
+  },
+  {
+    verdict: 'DEBUTÓ GANANDO',
+    note: (c) => `Primera de ${c.winner}. Que la disfrute, que no siempre se repite.`,
+    when: firstEver,
+  },
+  {
+    verdict: 'EL CLÁSICO ES SUYO',
+    note: (c) => `${c.h2h!.wins} a ${c.h2h!.losses} entre los dos. Se está poniendo aburrido.`,
+    when: owns,
+  },
+  {
+    verdict: 'AL FIN',
+    note: (c) => `${c.h2h!.losses} a 0 iba ${c.loser}. Ahora hay que empezar a contar de nuevo.`,
+    when: finallyBeatThem,
+  },
+  {
+    verdict: 'DESEMPATÓ LA SERIE',
+    note: (c) => `Venían ${c.h2h!.wins} a ${c.h2h!.losses}. Ya no.`,
+    when: deadEven,
+  },
+  {
+    verdict: 'A ESTE PASO NUNCA',
+    note: (c) => `${c.loser} suma ${games(c.loserDrought ?? 0)} sin ganar.`,
+    when: loserDryFor(3),
+  },
+  {
+    verdict: 'SIN GENERALA Y LE SOBRÓ',
+    note: (c) => `Ni una generala y ganó por ${c.margin}. Peor todavía.`,
+    when: (c) => c.generalas === 0,
+  },
+  {
+    verdict: 'CUESTIÓN DE OFICIO',
+    note: (c) =>
+      `${c.h2h!.wins + c.h2h!.losses} partidas jugaron entre ellos. Alguno tenía que aprender.`,
+    when: rivalry(6),
+  },
+]
+
+const CLOSE_EXTRA: Line[] = [
+  {
+    verdict: 'GANÓ PERO NO SE LA CREA',
+    note: (c) => `${c.margin} de diferencia. Con eso no alcanza para hablar hasta la próxima.`,
+  },
+  {
+    verdict: 'LA GENERALA FUE TODO',
+    note: (c) => `${c.margin} de diferencia y una generala en el medio. Sin esa fila no ganaba.`,
+    when: generala,
+  },
+  {
+    verdict: 'SIGUE INVICTO Y SUFRIENDO',
+    note: (c) => `${c.winnerStreak} al hilo, pero esta se la hicieron pelear.`,
+    when: streakOf(3),
+  },
+  {
+    verdict: 'SE LE ACABÓ LA SEQUÍA',
+    note: (c) => `${games(c.winnerDrought ?? 0)} sin ganar, y la cortó por ${c.margin}.`,
+    when: dryFor(3),
+  },
+  {
+    verdict: 'PRIMERA Y DE ARAÑAZO',
+    note: (c) => `Primera vez que gana ${c.winner}, y por ${c.margin}. Que no la muestre mucho.`,
+    when: firstEver,
+  },
+  {
+    verdict: 'ESTUVO A NADA DE CORTARLA',
+    note: (c) => `${c.loser} lleva ${games(c.loserDrought ?? 0)} sin ganar y hoy quedó a ${c.margin}.`,
+    when: loserDryFor(3),
+  },
+  {
+    verdict: 'EL HISTORIAL NO MIENTE',
+    note: (c) => `${c.h2h!.wins} a ${c.h2h!.losses}. Le costó, pero terminó donde termina siempre.`,
+    when: owns,
+  },
+  {
+    verdict: 'SE DIO VUELTA LA HISTORIA',
+    note: (c) => `${c.h2h!.losses} veces perdió contra ${c.loser}. Fue por ${c.margin}, pero fue.`,
+    when: finallyBeatThem,
+  },
+  {
+    verdict: 'UNA GENERALA CADA UNO',
+    note: () => 'Se decidió en las filas de arriba, como corresponde.',
+    when: (c) => generala(c) && loserGenerala(c),
+  },
+  {
+    verdict: 'ESTO SE DEFINE OTRO DÍA',
+    note: (c) => `${c.h2h!.wins} a ${c.h2h!.losses} van. Nadie se puede ir todavía.`,
+    when: deadEven,
+  },
+]
+
+const PHOTO_EXTRA: Line[] = [
+  {
+    verdict: 'POR ESO NO SE HABLA',
+    note: (c) => `${c.margin} de diferencia. Con eso no se le habla a nadie.`,
+  },
+  {
+    verdict: 'LA GENERALA LO SALVÓ',
+    note: (c) => `Ganó por ${c.margin}. Sin esa fila estaba mirando desde abajo.`,
+    when: generala,
+  },
+  {
+    verdict: 'LA RACHA AGUANTA DE MILAGRO',
+    note: (c) => `${c.winnerStreak} seguidas, la última por ${c.margin}. Se le está por cortar.`,
+    when: streakOf(3),
+  },
+  {
+    verdict: 'CORTÓ POR UN PELO',
+    note: (c) => `${games(c.winnerDrought ?? 0)} sin ganar, y se lleva esta por ${c.margin}.`,
+    when: dryFor(3),
+  },
+  {
+    verdict: 'DEBUT CON SUSTO',
+    note: (c) => `Primera de ${c.winner} en la vida, y por ${c.margin}. Casi nada.`,
+    when: firstEver,
+  },
+  {
+    verdict: 'OTRA VEZ NO',
+    note: (c) =>
+      `${c.loser} sigue en ${games(c.loserDrought ?? 0)} sin ganar, y esta se le fue por ${c.margin}.`,
+    when: loserDryFor(3),
+  },
+  {
+    verdict: 'CAMBIÁ LA ENERGÍA',
+    note: (c) => `${c.loser} todavía no ganó ninguna, y esta la tuvo a ${c.margin}.`,
+    when: loserNeverWon,
+  },
+  {
+    verdict: 'HIZO GENERALA Y PERDIÓ',
+    note: (c) => `${c.loser} sacó la generala y perdió por ${c.margin}. Que alguien lo abrace.`,
+    when: (c) => loserGenerala(c) && (c.generalas ?? 0) === 0,
+  },
+  {
+    verdict: 'EL CLÁSICO SIGUE ABIERTO',
+    note: (c) => `${c.h2h!.wins} a ${c.h2h!.losses}, y esta por ${c.margin}. No arregla nada.`,
+    when: deadEven,
+  },
+  {
+    verdict: 'HASTA EL HISTORIAL DUDA',
+    note: (c) => `${c.h2h!.wins} a ${c.h2h!.losses} van entre ellos. Esto no lo resuelve nadie.`,
+    when: rivalry(5),
+  },
+]
+
+const TIED_EXTRA: Line[] = [
+  {
+    verdict: 'NI PARA LA RACHA',
+    note: (c) => `${c.winner} venía con ${c.winnerStreak - 1} al hilo y se le corta con un empate.`,
+    when: (c) => c.winnerStreak >= 3,
+  },
+  {
+    verdict: 'SEGUÍS SIN GANAR',
+    note: (c) => `${games(c.winnerDrought ?? 0)} sin ganar, y esta no cuenta.`,
+    when: dryFor(3),
+  },
+  {
+    verdict: 'EMPATE Y ENCIMA GENERALA',
+    note: () => 'Se sacó la generala y terminó igual que el resto. Para llorar.',
+    when: generala,
+  },
+  {
+    verdict: 'EL CLÁSICO QUEDA IGUAL',
+    note: (c) =>
+      `${c.h2h!.wins} a ${c.h2h!.losses} seguían, y ${c.h2h!.wins} a ${c.h2h!.losses} siguen.`,
+    when: rivalry(4),
+  },
+]
+
 const POOLS: Record<Band, Line[]> = {
-  tied: TIED,
-  blowout: BLOWOUT,
-  comfortable: COMFORTABLE,
-  close: CLOSE,
-  photo: PHOTO,
+  tied: [...TIED, ...TIED_EXTRA],
+  blowout: [...BLOWOUT, ...BLOWOUT_EXTRA],
+  comfortable: [...COMFORTABLE, ...COMFORTABLE_EXTRA],
+  close: [...CLOSE, ...CLOSE_EXTRA],
+  photo: [...PHOTO, ...PHOTO_EXTRA],
 }
 
 /**
