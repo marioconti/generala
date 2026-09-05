@@ -12,11 +12,11 @@ import { Face } from '../../components/Face'
  * players the category column is narrow enough that the die carries the label.
  */
 function sizesFor(players: number) {
-  if (players <= 2) return { catW: '96px', cell: '20px', name: '11px', chip: 30, catFont: '9.5px', catTrack: '1px', figure: 84 }
-  if (players === 3) return { catW: '92px', cell: '19px', name: '10px', chip: 28, catFont: '9.5px', catTrack: '.8px', figure: 78 }
-  if (players === 4) return { catW: '86px', cell: '17px', name: '9px', chip: 26, catFont: '9px', catTrack: '.6px', figure: 66 }
-  if (players === 5) return { catW: '78px', cell: '16px', name: '8.5px', chip: 25, catFont: '8.5px', catTrack: '.4px', figure: 58 }
-  return { catW: '74px', cell: '15px', name: '8px', chip: 24, catFont: '8px', catTrack: '.2px', figure: 52 }
+  if (players <= 2) return { catW: '96px', cell: '20px', name: '11px', chip: 30, catFont: '9.5px', catTrack: '1px', figure: 58 }
+  if (players === 3) return { catW: '92px', cell: '19px', name: '10px', chip: 28, catFont: '9.5px', catTrack: '.8px', figure: 54 }
+  if (players === 4) return { catW: '86px', cell: '17px', name: '9px', chip: 26, catFont: '9px', catTrack: '.6px', figure: 47 }
+  if (players === 5) return { catW: '78px', cell: '16px', name: '8.5px', chip: 25, catFont: '8.5px', catTrack: '.4px', figure: 41 }
+  return { catW: '74px', cell: '15px', name: '8px', chip: 24, catFont: '8px', catTrack: '.2px', figure: 37 }
 }
 
 /** Where the ink flies when a row is crossed out, as [dx, dy, final scale]. */

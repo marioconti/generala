@@ -968,14 +968,26 @@ a {
 }
 
 /*
- * The number sits to the right and the figure stands at the left. Standing
- * still it takes about a third of its own box, so at two players the two never
- * touch and at six it only reaches the first digit -- and when it throws its
- * arms out it climbs over the total, which is the whole idea.
+ * Number over face, stacked, neither on top of the other.
+ *
+ * THEY USED TO OVERLAP ON PURPOSE and it was right at the time: the figure
+ * here was a little standing man who took about a third of his own box, so he
+ * leaned into the total rather than hiding it. The emoji that replaced him is
+ * a circle that fills its box, and the old rule was never revisited. On a
+ * phone at four players the cell is 60px and the face is 66px — wider than the
+ * cell it lives in — so the total disappeared completely. Reported from an
+ * actual game, not from a screenshot.
+ *
+ * There is no arrangement that fits both side by side: at six players the cell
+ * is 42px and a three-digit total already needs most of it. So they stack, and
+ * the face is capped by the width of the cell rather than by a constant.
  */
 .cell--total {
-  justify-content: flex-end;
-  padding: 0 4px 0 2px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 2px 2px 3px;
+  overflow: hidden;
   border-bottom: none;
   border-top: 2px solid var(--red);
   font-size: calc(var(--cell-size) + 6px);
@@ -985,27 +997,14 @@ a {
 
 .cell__total-num {
   line-height: 1;
-  /*
-   * Stays centred in the cell and simply lets the figure stand in front of it.
-   * Nudging it clear works at two players and runs the number out of the cell
-   * at six, where there is no room for both -- and being climbed on is the
-   * point.
-   */
-  position: relative;
-  z-index: 0;
+  flex-shrink: 0;
 }
 
-/*
- * The figure stands on the floor of its own cell, at the left, and is allowed
- * to overlap the total it belongs to. At six players there is not room for both
- * side by side, and a little man leaning into the number is better company than
- * a little man shrunk to fit beside it. The paper halo keeps both readable.
- */
+/* Never wider than the cell, whatever the per-player size asks for. */
 .cell--total .face-figure {
-  position: absolute;
-  left: -1px;
-  bottom: 2px;
-  z-index: 1;
+  width: min(100%, var(--figure-w));
+  height: auto;
+  min-height: 0;
 }
 
 /*
