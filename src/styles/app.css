@@ -1345,6 +1345,111 @@ a {
   flex-shrink: 0;
 }
 
+/* ==================================================================== mano */
+
+/*
+ * Who starts the next hand.
+ *
+ * It sits directly above the button that anotates one, because the moment the
+ * question gets asked is the moment somebody reaches for that button — and
+ * because it is the first thing on screen when a game is picked up again the
+ * next day, which is when nobody remembers.
+ */
+.mano-strip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  border: 2px solid var(--accent-deep);
+  box-shadow: 0 3px 10px rgba(58, 40, 24, 0.16);
+}
+
+.mano-strip__label {
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--ink-faint);
+}
+
+.mano-strip__name {
+  flex-grow: 1;
+  text-align: left;
+  font-family: var(--display);
+  font-size: 17px;
+  letter-spacing: 0.6px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mano-strip__change {
+  font-size: 11px;
+  color: var(--ink-faint);
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+
+.mano-strip:active {
+  transform: translateY(1px);
+}
+
+/* The same answer inside the table, so the column and the strip agree. */
+.tally-head__player--mano .tally-head__name {
+  color: var(--ink);
+}
+
+.tally-head__player--mano::after {
+  content: '';
+  width: 18px;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: var(--accent-deep);
+}
+
+.mano-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mano-pick__title {
+  margin: 0 0 4px;
+  font-family: var(--display);
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.mano-pick__row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 52px;
+  padding: 0 12px;
+  border-radius: var(--r-md);
+  background: var(--paper-lit);
+  color: var(--ink);
+}
+
+.mano-pick__row--on {
+  background: var(--rule-soft);
+}
+
+.mano-pick__name {
+  flex-grow: 1;
+  text-align: left;
+  font-size: 16px;
+}
+
+.mano-pick__note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
 /* ================================================================= feeling */
 
 /*

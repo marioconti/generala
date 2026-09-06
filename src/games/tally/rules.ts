@@ -39,6 +39,18 @@ export interface TallyGame {
   finishedAt: string | null
   /** Id of this game's entry in the history, once it has been recorded. */
   recordId?: string
+  /**
+   * Seat that started the FIRST hand. Everything else is derived from it.
+   *
+   * Storing the first one rather than the current one is what makes editing
+   * and deleting a hand safe: the person who starts is a function of how many
+   * hands have been played, so removing a mis-typed hand moves the marker back
+   * on its own instead of leaving it one seat out for the rest of the night.
+   *
+   * Optional because games saved before this existed have no such field, and
+   * they resume assuming the first player started.
+   */
+  dealer?: number
 }
 
 export interface VariantPreset {
@@ -117,4 +129,31 @@ export function progress(game: TallyGame): number {
   if (game.target === null) return 0
   const highest = Math.max(0, ...Object.values(totals(game)))
   return Math.min(1, highest / game.target)
+}
+
+/**
+ * Who starts a given hand. Rotates one seat per hand, which is how it goes at
+ * this table and at most others.
+ *
+ * `roundIndex` is 0-based, so `manoAt(game, game.rounds.length)` is the hand
+ * about to be played — the one the board needs to point at.
+ */
+export function manoAt(game: TallyGame, roundIndex: number): TallyPlayer {
+  const seats = game.players.length
+  return game.players[(((game.dealer ?? 0) + roundIndex) % seats + seats) % seats]
+}
+
+/** Who starts the hand nobody has anotated yet. */
+export function nextMano(game: TallyGame): TallyPlayer {
+  return manoAt(game, game.rounds.length)
+}
+
+/**
+ * What `dealer` has to be for `seat` to start the hand that is about to be
+ * played. Used when the table corrects the marker mid-game, which they will:
+ * nothing forces the first hand to have been started by the first name typed.
+ */
+export function dealerSoThat(game: TallyGame, seat: number): number {
+  const seats = game.players.length
+  return ((seat - game.rounds.length) % seats + seats) % seats
 }

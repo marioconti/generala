@@ -5,15 +5,18 @@ import { GameMenu } from '../../components/GameMenu'
 import { Icon } from '../../components/Icon'
 import { PaperGrain, Surface } from '../../components/Surface'
 import { TopBar } from '../../components/TopBar'
-import { progress, ranking, totalAt, totals, type TallyVariant } from '../../games/tally/rules'
+import { nextMano, progress, ranking, totalAt, totals, type TallyVariant } from '../../games/tally/rules'
 import { useTally } from '../../games/tally/useTally'
 import { GAME_NAMES } from '../../lib/history'
+import { Sheet } from '../../components/Sheet'
 import { RoundSheet } from './RoundSheet'
 
 export function TallyBoard({ variant }: { variant: TallyVariant }) {
-  const { game, addRound, editRound, removeRound, renamePlayer, rematch, reset } = useTally(variant)
+  const { game, addRound, editRound, removeRound, renamePlayer, setMano, rematch, reset } =
+    useTally(variant)
   const [editing, setEditing] = useState<number | 'new' | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [pickingMano, setPickingMano] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -25,6 +28,7 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
   const running = totals(game)
   const leader = ranking(game)[0]
   const pct = progress(game)
+  const mano = nextMano(game)
 
   return (
     <Surface game={variant}>
@@ -44,7 +48,10 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
         <div className="tally-head" style={{ '--players': game.players.length } as React.CSSProperties}>
           <div className="tally-head__corner">MANO</div>
           {game.players.map((player) => (
-            <div key={player.id} className="tally-head__player">
+            <div
+              key={player.id}
+              className={`tally-head__player${player.id === mano.id ? ' tally-head__player--mano' : ''}`}
+            >
               <Chip chip={player.chip} initial={player.name.charAt(0)} size={26} />
               <span className="tally-head__name">{player.name.toUpperCase()}</span>
             </div>
@@ -102,10 +109,48 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
         </div>
       )}
 
+      {/*
+        Deliberately "EMPIEZA" and not "MANO". On this screen the word mano is
+        already the round — the left column, the button below, the empty state
+        — and both meanings are correct Spanish, which is exactly why asking
+        "quién es mano" here had no clear answer. A verb cannot be mistaken for
+        a row number.
+      */}
+      <button type="button" className="mano-strip" onClick={() => setPickingMano(true)}>
+        <span className="mano-strip__label">EMPIEZA</span>
+        <Chip chip={mano.chip} initial={mano.name.charAt(0)} size={24} />
+        <span className="mano-strip__name">{mano.name.toUpperCase()}</span>
+        <span className="mano-strip__change">cambiar</span>
+      </button>
+
       <button type="button" className="big-btn" onClick={() => setEditing('new')}>
         <Icon name="plus" size={20} />
         MANO
       </button>
+
+      {pickingMano && (
+        <Sheet label="Quién empieza esta mano" onClose={() => setPickingMano(false)}>
+          <div className="mano-pick">
+            <p className="mano-pick__title">¿Quién empieza esta mano?</p>
+            {game.players.map((player, seat) => (
+              <button
+                key={player.id}
+                type="button"
+                className={`mano-pick__row${player.id === mano.id ? ' mano-pick__row--on' : ''}`}
+                onClick={() => {
+                  setMano(seat)
+                  setPickingMano(false)
+                }}
+              >
+                <Chip chip={player.chip} initial={player.name.charAt(0)} size={30} />
+                <span className="mano-pick__name">{player.name}</span>
+                {player.id === mano.id && <Icon name="check" size={18} />}
+              </button>
+            ))}
+            <p className="mano-pick__note">Después rota sola, una silla por mano.</p>
+          </div>
+        </Sheet>
+      )}
 
       {editing !== null && (
         <RoundSheet

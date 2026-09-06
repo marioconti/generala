@@ -8,6 +8,7 @@ import {
   winnerNames,
   type TallyGame,
   type TallyVariant,
+  dealerSoThat,
 } from './rules'
 
 function isTally(value: unknown): boolean {
@@ -55,6 +56,10 @@ export function useTally(variant: TallyVariant) {
       recordId: next.recordId ?? entry?.id,
     }
   }
+
+  /** Moves the marker so `seat` starts the hand that is about to be played. */
+  const setMano = (seat: number) =>
+    store.update((current) => ({ ...current, dealer: dealerSoThat(current, seat) }))
 
   const addRound = (scores: Record<string, number>) =>
     store.update((current) => settle({ ...current, rounds: [...current.rounds, scores] }))
@@ -104,6 +109,7 @@ export function useTally(variant: TallyVariant) {
     editRound,
     removeRound,
     renamePlayer,
+    setMano,
     rematch,
     reset,
   }
