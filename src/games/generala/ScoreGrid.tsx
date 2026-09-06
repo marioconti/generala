@@ -1,10 +1,12 @@
-import { Fragment, useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { CATEGORIES, FIRST_SPECIAL, moods, scoreOf, totalFor } from './rules'
 import type { CategoryId, Game } from './types'
 import { Chip } from '../../components/Chip'
 import { Die } from '../../components/Die'
 import { PaperGrain } from '../../components/Surface'
 import { Face } from '../../components/Face'
+import { FeelingCard } from '../../components/FeelingCard'
+import { askFace, type Reply } from '../../lib/feelings'
 
 /**
  * Column widths and type sizes shrink with the player count so the whole sheet
@@ -80,6 +82,8 @@ export function ScoreGrid({ game, drama, onPick }: Props) {
   const size = sizesFor(game.players.length)
   const mood = moods(game)
   const sheet = useRef<HTMLDivElement>(null)
+  /** Which face was tapped, and what it answered. Null while the panel is shut. */
+  const [asked, setAsked] = useState<{ at: number; reply: Reply } | null>(null)
 
   /**
    * The shake is driven by hand rather than by a class in the render, because a
@@ -185,15 +189,30 @@ export function ScoreGrid({ game, drama, onPick }: Props) {
 
         <div className="catcell catcell--total">TOTAL</div>
         {game.players.map((player, i) => (
-          <div
+          <button
+            type="button"
             key={`total-${player.id}`}
             className={`cell cell--total${i === game.turn ? ' cell--turn' : ''}`}
+            aria-label={`Cómo se siente ${player.name}`}
+            onClick={() => setAsked({ at: i, reply: askFace(player.id, mood[i]) })}
           >
             <Face mood={mood[i]} size={size.figure} seed={player.id} />
             <span className="cell__total-num">{totalFor(game, player.id)}</span>
-          </div>
+          </button>
         ))}
       </div>
+
+      {asked && (
+        <FeelingCard
+          name={game.players[asked.at].name}
+          chip={game.players[asked.at].chip}
+          mood={mood[asked.at]}
+          seed={game.players[asked.at].id}
+          line={asked.reply.line}
+          nagged={asked.reply.nagged}
+          onClose={() => setAsked(null)}
+        />
+      )}
     </div>
   )
 }
