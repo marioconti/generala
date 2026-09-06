@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Icon } from '../components/Icon'
-import { Suit } from '../components/Suit'
+import { GameMark } from '../components/GameMark'
 import { Surface } from '../components/Surface'
 import { useGenerala } from '../games/generala/useGenerala'
 import { useTally } from '../games/tally/useTally'
@@ -13,33 +13,17 @@ import {
 } from '../lib/history'
 
 interface Door {
-  id: GameId
+  id: 'generala' | 'rummy' | 'chinchon'
   to: string
   name: string
   blurb: string
-  icon: 'dice' | 'suit'
-  suit?: 'spade' | 'oro' | 'espada'
 }
 
 const DOORS: Door[] = [
-  { id: 'generala', to: '/generala', name: 'Generala', blurb: '5 dados · 11 juegos', icon: 'dice' },
-  { id: 'rummy', to: '/rummy', name: 'Rummy', blurb: 'mano a mano', icon: 'suit', suit: 'spade' },
-  { id: 'chinchon', to: '/chinchon', name: 'Chinchón', blurb: 'a 100 · gana el menor', icon: 'suit', suit: 'oro' },
+  { id: 'generala', to: '/generala', name: 'Generala', blurb: '5 dados · 11 juegos' },
+  { id: 'rummy', to: '/rummy', name: 'Rummy', blurb: 'mano a mano' },
+  { id: 'chinchon', to: '/chinchon', name: 'Chinchón', blurb: 'a 100 · gana el menor' },
 ]
-
-/** Small dice glyph for the Generala door, drawn to match the Suit icons' weight. */
-function DiceMark() {
-  return (
-    <svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="2.5" y="2.5" width="19" height="19" rx="5" fill="none" stroke="currentColor" strokeWidth="1.9" />
-      <circle cx="8" cy="8" r="1.8" fill="currentColor" />
-      <circle cx="16" cy="8" r="1.8" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.8" fill="currentColor" />
-      <circle cx="8" cy="16" r="1.8" fill="currentColor" />
-      <circle cx="16" cy="16" r="1.8" fill="currentColor" />
-    </svg>
-  )
-}
 
 export function Home() {
   const generala = useGenerala()
@@ -80,7 +64,7 @@ export function Home() {
           {DOORS.map((door) => (
             <Link key={door.id} to={door.to} className="door" data-game={door.id}>
               <div className="door__mark">
-                {door.icon === 'dice' ? <DiceMark /> : <Suit suit={door.suit!} size={34} />}
+                <GameMark game={door.id} />
               </div>
               <div className="door__name">{door.name}</div>
               <div className="door__blurb">{door.blurb}</div>

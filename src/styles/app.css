@@ -580,12 +580,23 @@ a {
   transform: scale(0.975);
 }
 
+/*
+ * The illustration owns the top-right; the name and the blurb own the
+ * bottom-left. It must sit fully inside the padding — the door clips its own
+ * overflow, so a drawing nudged past the edge loses a die rather than bleeding
+ * off it.
+ *
+ * --mark-fill is the door's own felt, so the pieces of a fan or a stack cover
+ * each other instead of showing through.
+ */
 .door__mark {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 9px;
+  right: 9px;
   color: var(--accent);
-  opacity: 0.9;
+  opacity: 0.92;
+  --mark-fill: var(--mat-deep);
+  pointer-events: none;
 }
 
 .door__name {
