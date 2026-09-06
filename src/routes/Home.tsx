@@ -4,7 +4,6 @@ import { Suit } from '../components/Suit'
 import { Surface } from '../components/Surface'
 import { useGenerala } from '../games/generala/useGenerala'
 import { useTally } from '../games/tally/useTally'
-import { useTruco } from '../games/truco/useTruco'
 import {
   CHAMPION_THRESHOLD,
   getChampion,
@@ -24,7 +23,6 @@ interface Door {
 
 const DOORS: Door[] = [
   { id: 'generala', to: '/generala', name: 'Generala', blurb: '5 dados · 11 juegos', icon: 'dice' },
-  { id: 'truco', to: '/truco', name: 'Truco', blurb: 'palitos · a 30', icon: 'suit', suit: 'espada' },
   { id: 'rummy', to: '/rummy', name: 'Rummy', blurb: 'mano a mano', icon: 'suit', suit: 'spade' },
   { id: 'chinchon', to: '/chinchon', name: 'Chinchón', blurb: 'a 100 · gana el menor', icon: 'suit', suit: 'oro' },
 ]
@@ -47,13 +45,11 @@ export function Home() {
   const generala = useGenerala()
   const rummy = useTally('rummy')
   const chinchon = useTally('chinchon')
-  const truco = useTruco()
 
   const inProgress: Partial<Record<GameId, boolean>> = {
     generala: !!generala.game && !generala.game.finishedAt && generala.game.history.length > 0,
     rummy: !!rummy.game && !rummy.game.finishedAt && rummy.game.rounds.length > 0,
     chinchon: !!chinchon.game && !chinchon.game.finishedAt && chinchon.game.rounds.length > 0,
-    truco: !!truco.game && !truco.game.finishedAt && truco.game.history.length > 0,
   }
 
   useHistoryVersion()
@@ -74,7 +70,7 @@ export function Home() {
             <Icon name="trophy" size={22} />
             <div className="champion-banner__text">
               <strong>{champion.name.toUpperCase()}</strong> es Campeón Supremo
-              <span>{champion.wins} victorias · retirá el certificado</span>
+              <span>{champion.points} puntos · retirá el certificado</span>
             </div>
             <Icon name="forward" size={18} />
           </Link>
@@ -98,7 +94,7 @@ export function Home() {
           <div className="home__foot-text">
             {leader ? (
               <>
-                Va ganando <strong>{leader.name}</strong> — {leader.wins} de {CHAMPION_THRESHOLD}
+                Va ganando <strong>{leader.name}</strong> — {leader.points} de {CHAMPION_THRESHOLD}
               </>
             ) : (
               'Todavía no jugaron ninguna partida'

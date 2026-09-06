@@ -49,5 +49,4 @@ export function Suit({ suit, size = 20, color = 'currentColor', opacity = 1 }: P
 export const DECKS = {
   rummy: ['spade', 'heart', 'diamond', 'club'] as SuitName[],
   chinchon: ['oro', 'copa', 'espada', 'basto'] as SuitName[],
-  truco: ['espada', 'basto', 'oro', 'copa'] as SuitName[],
 }

@@ -69,18 +69,6 @@
   --accent-ink: #3d2e12;
 }
 
-/* Truco — olive over dark walnut. The bar table, worn in. */
-[data-game='truco'] {
-  --wood-deep: #3b2a1c;
-  --wood: #5a4028;
-  --wood-lit: #775534;
-  --mat-lit: #7d8a54;
-  --mat: #61703f;
-  --mat-deep: #45522c;
-  --accent: #dfbb6b;
-  --accent-deep: #b8933f;
-  --accent-ink: #3a2f13;
-}
 
 /* Rummy — eucalyptus over grey oak. Cooler, but still green. */
 [data-game='rummy'] {

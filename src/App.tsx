@@ -10,8 +10,6 @@ import { Splash } from './routes/Splash'
 import { TallyBoard } from './routes/tally/Board'
 import { TallyResult } from './routes/tally/Result'
 import { TallySetup } from './routes/tally/Setup'
-import { TrucoBoard } from './routes/truco/Board'
-import { TrucoResult } from './routes/truco/Result'
 
 const SPLASH_KEY = 'anotador.splash.seen'
 
@@ -27,7 +25,7 @@ function seenSplash(): boolean {
  * HashRouter, not BrowserRouter.
  *
  * GitHub Pages serves static files with no server-side rewrites, so reloading
- * on /truco would 404. With #/truco the path never reaches the server. It also
+ * on /rummy would 404. With #/rummy the path never reaches the server. It also
  * leaves the door open for the NFC tag to point straight at one game.
  */
 export function App() {
@@ -65,8 +63,6 @@ export function App() {
         <Route path="/chinchon/partida" element={<TallyBoard variant="chinchon" />} />
         <Route path="/chinchon/resultado" element={<TallyResult variant="chinchon" />} />
 
-        <Route path="/truco" element={<TrucoBoard />} />
-        <Route path="/truco/resultado" element={<TrucoResult />} />
 
         <Route path="/historial" element={<History />} />
         <Route path="/certificado" element={<Certificate />} />

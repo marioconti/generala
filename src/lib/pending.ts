@@ -2,7 +2,6 @@ import { CATEGORIES, ranking as generalaRanking } from '../games/generala/rules'
 import { useGenerala } from '../games/generala/useGenerala'
 import { progress as tallyProgress, ranking as tallyRanking } from '../games/tally/rules'
 import { useTally } from '../games/tally/useTally'
-import { TARGET, useTruco } from '../games/truco/useTruco'
 import type { GameId } from './history'
 
 /** A game left open — started, not finished, still sitting where it was. */
@@ -29,7 +28,6 @@ export interface Pending {
  */
 export function usePending(): Pending[] {
   const generala = useGenerala()
-  const truco = useTruco()
   const rummy = useTally('rummy')
   const chinchon = useTally('chinchon')
 
@@ -48,20 +46,6 @@ export function usePending(): Pending[] {
       progress: cells === 0 ? 0 : sheet.history.length / cells,
       detail: `${sheet.history.length} de ${cells} casilleros`,
       startedAt: sheet.startedAt,
-    })
-  }
-
-  const bar = truco.game
-  if (bar && !bar.finishedAt && bar.history.length > 0) {
-    const [us, them] = bar.points
-    pending.push({
-      game: 'truco',
-      to: '/truco/partida',
-      players: [...bar.names],
-      leader: us === them ? null : us > them ? bar.names[0] : bar.names[1],
-      progress: Math.min(1, Math.max(us, them) / TARGET),
-      detail: `${us} a ${them}, a ${TARGET}`,
-      startedAt: bar.startedAt,
     })
   }
 

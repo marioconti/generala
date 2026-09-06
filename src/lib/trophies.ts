@@ -237,7 +237,11 @@ export interface King {
 export function getKings(): King[] {
   const standings = getStandings()
 
-  return (Object.keys(GAME_NAMES) as GameId[]).map((game) => {
+  // Truco is filed under GAME_NAMES so old games still read, but it is no
+  // longer playable and has no business owning a trophy.
+  return (Object.keys(GAME_NAMES) as GameId[])
+    .filter((game) => game !== 'truco')
+    .map((game) => {
     let best: { name: string; wins: number } | null = null
     for (const player of standings) {
       const wins = player.byGame[game]

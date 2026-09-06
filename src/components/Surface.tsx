@@ -1,7 +1,11 @@
 import { useEffect, useId, type ReactNode } from 'react'
 import type { GameId } from '../lib/history'
 
-export type SurfaceId = GameId | 'home'
+/**
+ * Truco is excluded: it is still a GameId so games already on record keep
+ * reading, but it has no screen any more, so it has no table to draw either.
+ */
+export type SurfaceId = Exclude<GameId, 'truco'> | 'home'
 
 /**
  * Wood table, felt mat, and whatever the game puts on top.
@@ -70,13 +74,6 @@ const PATTERNS: Record<SurfaceId, { size: number; draw: ReactNode }> = {
         <circle cx="13" cy="13" r="2.6" fill={LINE} />
         <circle cx="39" cy="39" r="2.6" fill={LINE} />
       </>
-    ),
-  },
-  // Gentle waves — the weave of a well-used cloth.
-  truco: {
-    size: 44,
-    draw: (
-      <path d="M0 22 Q11 14 22 22 T44 22" fill="none" stroke={LINE} strokeWidth="1.6" strokeLinecap="round" />
     ),
   },
   // Rounded leaves.

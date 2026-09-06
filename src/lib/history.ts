@@ -14,6 +14,27 @@ export const GAME_NAMES: Record<GameId, string> = {
 export const CHAMPION_THRESHOLD = 15
 
 /**
+ * What winning each game is worth toward the ice cream.
+ *
+ * A rummy runs a whole evening — hand after hand until somebody crosses the
+ * target — and a generala is eleven rows and over in twenty minutes. Counting
+ * both as one win made the race a measure of how many SHORT games somebody had
+ * time for, which is not what anyone at the table thinks they are competing
+ * for.
+ *
+ * Set by the table on 2026-09-06: a rummy is worth five generalas. Chinchón
+ * stays at 1 because nobody has said otherwise, and picking a number for it
+ * here would be inventing the standings. Truco is no longer playable and the
+ * weight only still exists for games already on record.
+ */
+export const WIN_VALUE: Record<GameId, number> = {
+  generala: 1,
+  rummy: 5,
+  chinchon: 1,
+  truco: 1,
+}
+
+/**
  * Per-player counters a finished game contributes to the trophy cabinet,
  * keyed by player name and then by counter — 'generala', 'served', 'scratched'.
  *
@@ -42,6 +63,13 @@ export interface FinishedGame {
 }
 
 export interface Standing {
+  /**
+   * What counts for the ice cream: wins weighted by WIN_VALUE. This is the
+   * number the race is run on; `wins` below stays the plain count of games
+   * won, because a certificate that says "12 victorias" has to mean twelve
+   * games.
+   */
+  points: number
   /** Display name, as most recently typed. */
   name: string
   wins: number
@@ -200,6 +228,7 @@ export function getStandings(): Standing[] {
         table.get(key) ??
         ({
           name: player.name,
+          points: 0,
           wins: 0,
           played: 0,
           byGame: { generala: 0, rummy: 0, chinchon: 0, truco: 0 },
@@ -211,18 +240,23 @@ export function getStandings(): Standing[] {
       // A draw credits nobody.
       if (entry.winners.length === 1 && normalize(entry.winners[0]) === key) {
         current.wins += 1
-        current.byGame[entry.game] += 1
+        // ?? 1 rather than a bare lookup: a game filed under a name this build
+        // no longer knows would otherwise make the whole total NaN.
+        current.points += WIN_VALUE[entry.game] ?? 1
+        current.byGame[entry.game] = (current.byGame[entry.game] ?? 0) + 1
       }
       table.set(key, current)
     }
   }
 
-  return [...table.values()].sort((a, b) => b.wins - a.wins || b.played - a.played)
+  return [...table.values()].sort(
+    (a, b) => b.points - a.points || b.wins - a.wins || b.played - a.played,
+  )
 }
 
 /** The first player to reach the threshold, or null. */
 export function getChampion(): Standing | null {
-  return getStandings().find((s) => s.wins >= CHAMPION_THRESHOLD) ?? null
+  return getStandings().find((s) => s.points >= CHAMPION_THRESHOLD) ?? null
 }
 
 /**

@@ -158,7 +158,7 @@ export function History() {
                           <div className="stand__top">
                             <span className="stand__name">{s.name}</span>
                             <span className="stand__count">
-                              {s.wins}
+                              {s.points}
                               <em>/{CHAMPION_THRESHOLD}</em>
                             </span>
                           </div>
@@ -166,7 +166,7 @@ export function History() {
                             <div
                               className="stand__fill"
                               style={{
-                                width: `${Math.min(100, (s.wins / CHAMPION_THRESHOLD) * 100)}%`,
+                                width: `${Math.min(100, (s.points / CHAMPION_THRESHOLD) * 100)}%`,
                               }}
                             />
                           </div>

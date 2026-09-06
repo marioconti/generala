@@ -58,7 +58,9 @@ export function Certificate() {
         <div className="stack">
           <div className="rule-line">TODAVÍA NO HAY CAMPEÓN</div>
           <p className="empty-note">
-            El certificado se emite cuando alguien gana <strong>{CHAMPION_THRESHOLD} partidas</strong>.
+            El certificado se emite al llegar a <strong>{CHAMPION_THRESHOLD} puntos</strong>.
+            <br />
+            Una generala vale 1, un rummy vale 5.
             <br />
             Sigan jugando.
           </p>
@@ -98,9 +100,10 @@ export function Certificate() {
             <div className="cert__hr" />
 
             <p className="cert__text">
-              habiendo alcanzado las <strong>{champion.wins} victorias</strong> sobre un total de{' '}
-              {champion.played} partidas disputadas en esta mesa, queda consagrado con todos los
-              honores, prerrogativas y cargadas que el título conlleva.
+              habiendo alcanzado los <strong>{champion.points} puntos</strong> con{' '}
+              {champion.wins} victorias sobre un total de {champion.played} partidas disputadas en
+              esta mesa, queda consagrado con todos los honores, prerrogativas y cargadas que el
+              título conlleva.
             </p>
 
             <div className="cert__prize">
@@ -118,7 +121,7 @@ export function Certificate() {
             </div>
 
             <div className="cert__breakdown">
-              {(['generala', 'truco', 'rummy', 'chinchon'] as const)
+              {(['generala', 'rummy', 'chinchon'] as const)
                 .filter((g) => champion.byGame[g] > 0)
                 .map((g) => (
                   <span key={g} className="cert__tag">
