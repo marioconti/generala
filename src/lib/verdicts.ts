@@ -659,7 +659,7 @@ const CLOSE_EXTRA: Line[] = [
   },
   {
     verdict: 'UNA GENERALA CADA UNO',
-    note: () => 'Se decidió en las filas de arriba, como corresponde.',
+    note: () => 'Se definió en las filas que valen, como corresponde.',
     when: (c) => generala(c) && loserGenerala(c),
   },
   {

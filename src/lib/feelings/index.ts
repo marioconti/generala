@@ -10,7 +10,9 @@
  * handed the totals; a line here that guessed at a margin would be inventing.
  *
  * ASKED TWICE INSIDE A MINUTE, the face tells you to go away instead. Not a
- * lockout — an answer, in the same voice, from `nagging.ts`.
+ * lockout — an answer, in the same voice, from `nagging.ts`. Unless the mood
+ * has actually moved to another face in the meantime, in which case there is
+ * real news and it answers properly; see askFace.
  */
 import { DOWN } from './down'
 import { ECSTATIC } from './ecstatic'
@@ -57,7 +59,7 @@ export function feelingOf(mood: number): Feeling {
  * the moment you shut the panel — which is exactly the spamming this is here
  * to stop.
  */
-const lastAnswered = new Map<string, number>()
+const lastAnswered = new Map<string, { at: number; feeling: Feeling }>()
 const recent = new Map<string, string[]>()
 
 /**
@@ -95,11 +97,25 @@ export function askFace(playerId: string, mood: number, now = Date.now()): Reply
   const feeling = feelingOf(mood)
   const last = lastAnswered.get(playerId)
 
-  if (last !== undefined && now - last < COOLDOWN_MS) {
+  /*
+   * A CHANGE OF FACE BEATS THE COOLDOWN, and this is the point of storing the
+   * feeling alongside the time.
+   *
+   * The minute is there to stop the same answer being pulled out of somebody
+   * over and over. It is not there to withhold news. Somebody scores, the face
+   * on the sheet visibly drops from pleased to wrecked, you tap it BECAUSE it
+   * changed — and the old version told you to go away, which is the single
+   * most annoying thing this feature could do.
+   *
+   * It also makes the brush-offs honest: several of them say nothing changed,
+   * and now that is the only situation in which they can appear.
+   */
+  const stale = last !== undefined && now - last.at < COOLDOWN_MS && last.feeling === feeling
+  if (stale) {
     return { line: freshLine(`${playerId}:nag`, NAGGING[feeling]), nagged: true }
   }
 
-  lastAnswered.set(playerId, now)
+  lastAnswered.set(playerId, { at: now, feeling })
   return { line: freshLine(`${playerId}:${feeling}`, POOLS[feeling]), nagged: false }
 }
 

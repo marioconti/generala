@@ -109,12 +109,12 @@ const LINES: Line[] = [
   /* ------------------------------------------------ what carried them */
   {
     title: 'A FUERZA DE RUMMY',
-    note: () => 'Noches enteras esperando que el otro se pase de cien.',
+    note: () => 'Noches enteras esperando que alguien se pase de cien.',
     when: carried('rummy'),
   },
   {
     title: 'EL DE LOS RUMMYS',
-    note: (f) => `${f.champion.byGame.rummy} partidas largas. Ninguna se le escapó.`,
+    note: (f) => `${f.champion.byGame.rummy} partidas largas ganadas. Ahí no se cansa nadie.`,
     when: carried('rummy'),
   },
   {
@@ -151,7 +151,7 @@ const LINES: Line[] = [
   },
   {
     title: 'SE FUE SOLO',
-    note: (f) => `${f.runnerUp!.name} lo miró de atrás todo el campeonato.`,
+    note: (f) => `${f.runnerUp!.name} lo mira de atrás y no lo alcanzó nunca.`,
     when: walkover,
   },
   {
