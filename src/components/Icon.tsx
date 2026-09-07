@@ -20,6 +20,9 @@ const PATHS = {
   flame: 'M12 3c3.4 3.2 5 5.7 5 8.6a5 5 0 0 1-10 0c0-1.9.8-3.3 2-4.5.4 1.3 1.1 2 1.9 2.3.1-2.4-.3-4.2 1.1-6.4z',
   bolt: 'M13 3L5.5 13.5H11L10 21l7.5-10.5H12z',
   target: 'M12 3.5v3.2M12 17.3v3.2M3.5 12h3.2M17.3 12h3.2M12 8.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6z',
+  // Three peaks and a band. Drawn in one stroke so it holds at 14px, where
+  // the crown beside a name is smaller than any other icon here is ever used.
+  crown: 'M4 17.5h16M4.5 7l4 3.5L12 5l3.5 5.5 4-3.5-1.4 8.5H5.9z',
 } as const
 
 export type IconName = keyof typeof PATHS
@@ -28,9 +31,10 @@ interface Props {
   name: IconName
   size?: number
   width?: number
+  className?: string
 }
 
-export function Icon({ name, size = 20, width = 2 }: Props) {
+export function Icon({ name, size = 20, width = 2, className }: Props) {
   return (
     <svg
       width={size}
@@ -42,6 +46,7 @@ export function Icon({ name, size = 20, width = 2 }: Props) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      className={className}
       style={{ flexShrink: 0 }}
     >
       <path d={PATHS[name]} />

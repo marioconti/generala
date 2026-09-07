@@ -5,10 +5,12 @@ import { Icon } from '../components/Icon'
 import { playedOn } from '../components/ResultCard'
 import { Surface } from '../components/Surface'
 import { TopBar } from '../components/TopBar'
+import { championPlaque } from '../lib/champion'
 import {
   CHAMPION_THRESHOLD,
   clearHistory,
   GAME_NAMES,
+  getChampion,
   getHistory,
   getStandings,
   useHistoryVersion,
@@ -71,6 +73,8 @@ export function History() {
   const trophies = getTrophies()
   const kings = getKings()
   const coverage = getFeatsCoverage()
+  const champion = getChampion()
+  const plaque = champion ? championPlaque(champion) : null
 
   const nothingYet = standings.length === 0
   const youngTrophies = trophies.filter((t) => t.young)
@@ -156,7 +160,12 @@ export function History() {
                         <Chip chip={i} initial={s.name.charAt(0)} size={30} />
                         <div className="stand__body">
                           <div className="stand__top">
-                            <span className="stand__name">{s.name}</span>
+                            <span className="stand__name">
+                              {s.name}
+                              {champion?.name === s.name && (
+                                <Icon name="crown" size={14} className="stand__crown" />
+                              )}
+                            </span>
                             <span className="stand__count">
                               {s.points}
                               <em>/{CHAMPION_THRESHOLD}</em>
@@ -197,6 +206,28 @@ export function History() {
 
             {tab === 'trofeos' && (
               <>
+                {/*
+                  The champion's plaque goes above the cabinet, not in it. The
+                  trophies below are all "who leads this counter" and change
+                  hands whenever somebody passes somebody; this one is the
+                  season being over. Rows in a list read as equals, so it gets
+                  a card of its own.
+                */}
+                {champion && plaque && (
+                  <div className="card card--crown">
+                    <div className="card__frame" />
+                    <div className="card__body plaque">
+                      <Icon name="crown" size={38} />
+                      <div className="plaque__name">{champion.name.toUpperCase()}</div>
+                      <div className="plaque__title">{plaque.title}</div>
+                      <p className="plaque__note">{plaque.note}</p>
+                      <Link to="/certificado" className="plaque__link">
+                        VER EL CERTIFICADO
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
                 <div className="card">
                   <div className="card__frame" />
                   <div className="card__body">

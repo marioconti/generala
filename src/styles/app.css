@@ -2007,12 +2007,88 @@ a {
 }
 
 .stand__name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/*
+ * The crown beside the champion's name. Small on purpose — the row already
+ * carries a full progress bar and a score, and a big gold mark on one of six
+ * names turns the list into a podium of one.
+ */
+.stand__crown {
+  color: var(--accent-deep);
+}
+
+/* ================================================================== plaque */
+
+/*
+ * The champion's card, above the cabinet rather than inside it.
+ *
+ * Every trophy below is "who currently leads this counter" and changes hands
+ * the moment somebody passes somebody. This one is the season being over, so
+ * it does not sit in the same list: rows in a list read as equals.
+ */
+.card--crown {
+  background: linear-gradient(168deg, var(--paper-lit) 0%, #f2e3c4 100%);
+  border: 1.5px solid var(--accent-deep);
+}
+
+.plaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--accent-deep);
+}
+
+.plaque__name {
+  font-family: var(--display);
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.plaque__title {
+  font-family: var(--display);
+  font-size: 12px;
+  letter-spacing: 2.4px;
+  color: var(--accent-deep);
+}
+
+/*
+ * Capped at a readable measure rather than the card's full width: these are
+ * one-liners, and a one-liner that wraps across the whole screen stops landing
+ * — the same reason the feeling panel caps its line.
+ */
+.plaque__note {
+  margin: 2px 0 0;
+  max-width: 26ch;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  text-wrap: balance;
+}
+
+.plaque__link {
+  margin-top: 6px;
+  font-family: var(--display);
+  font-size: 11px;
+  letter-spacing: 1.8px;
+  color: var(--accent-deep);
+  text-decoration: underline;
 }
 
 .stand__count {

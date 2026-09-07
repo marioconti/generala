@@ -51,7 +51,9 @@ export function Home() {
 
         {champion && (
           <Link to="/certificado" className="champion-banner">
-            <Icon name="trophy" size={22} />
+            {/* Crown, not trophy: the trophy icon is El General's in the
+                cabinet, and the two are not the same title. */}
+            <Icon name="crown" size={22} />
             <div className="champion-banner__text">
               <strong>{champion.name.toUpperCase()}</strong> es Campeón Supremo
               <span>{champion.points} puntos · retirá el certificado</span>

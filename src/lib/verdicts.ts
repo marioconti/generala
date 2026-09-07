@@ -762,7 +762,7 @@ const POOLS: Record<Band, Line[]> = {
  * those bits — five games in a row kept landing on the same two lines. The
  * avalanche step is what makes neighbouring seeds pick unrelated lines.
  */
-function hash(text: string): number {
+export function hash(text: string): number {
   let h = 5381
   for (let i = 0; i < text.length; i += 1) h = ((h << 5) + h + text.charCodeAt(i)) >>> 0
   h ^= h >>> 16
