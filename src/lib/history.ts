@@ -14,23 +14,28 @@ export const GAME_NAMES: Record<GameId, string> = {
 export const CHAMPION_THRESHOLD = 15
 
 /**
- * What winning each game is worth toward the ice cream.
+ * What winning a game is worth toward the ice cream.
  *
- * A rummy runs a whole evening — hand after hand until somebody crosses the
- * target — and a generala is eleven rows and over in twenty minutes. Counting
- * both as one win made the race a measure of how many SHORT games somebody had
- * time for, which is not what anyone at the table thinks they are competing
- * for.
+ * PER FINISHED GAME, NEVER PER HAND. In rummy and chinchón a game is the whole
+ * run of hands until somebody crosses 100 and loses it — that is the thing
+ * that gets filed and that is the thing that scores. The distinction is not
+ * enforced here so much as made impossible to get wrong: a FinishedGame has no
+ * hand count in it at all, so the number of hands cannot reach this table.
  *
- * Set by the table on 2026-09-06: a rummy is worth five generalas. Chinchón
- * stays at 1 because nobody has said otherwise, and picking a number for it
- * here would be inventing the standings. Truco is no longer playable and the
- * weight only still exists for games already on record.
+ * The weights follow how long a game takes, because that is the only thing
+ * that made the old count of games unfair. A rummy runs an evening, a chinchón
+ * is nearly as long, a generala is eleven rows and over in twenty minutes.
+ * Counting all three as one win made the race a measure of how many SHORT
+ * games somebody had time for.
+ *
+ * Set by the table: rummy 5 and generala 1 on 2026-09-06, chinchón 3 on
+ * 2026-09-07. Truco is no longer playable and its weight only still exists so
+ * that games already on record keep scoring.
  */
 export const WIN_VALUE: Record<GameId, number> = {
   generala: 1,
   rummy: 5,
-  chinchon: 1,
+  chinchon: 3,
   truco: 1,
 }
 

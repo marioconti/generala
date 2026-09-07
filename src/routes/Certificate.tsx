@@ -60,7 +60,7 @@ export function Certificate() {
           <p className="empty-note">
             El certificado se emite al llegar a <strong>{CHAMPION_THRESHOLD} puntos</strong>.
             <br />
-            Una generala vale 1, un rummy vale 5.
+            Una generala vale 1, un chinchón 3, un rummy 5.
             <br />
             Sigan jugando.
           </p>
