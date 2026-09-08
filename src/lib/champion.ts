@@ -33,7 +33,7 @@ export interface ChampionFacts {
   rate: number
 }
 
-const GAMES: GameId[] = ['generala', 'rummy', 'chinchon', 'truco']
+const GAMES: GameId[] = ['generala', 'rummy', 'chinchon', 'domino', 'truco']
 
 /**
  * Who the champion has beaten most, with the count.
@@ -95,8 +95,13 @@ const CONDITIONAL_WEIGHT = 4
 
 const carried = (game: GameId, share = 0.55) => (f: ChampionFacts) =>
   f.carriedBy === game && f.carriedShare >= share && (f.champion.byGame[game] ?? 0) >= 2
+/* All four doors, at least once each. Truco is not in the list: it cannot be
+   played any more, so requiring it would retire the line rather than raise the
+   bar. */
 const spread = (f: ChampionFacts) =>
-  (['generala', 'rummy', 'chinchon'] as GameId[]).every((g) => (f.champion.byGame[g] ?? 0) >= 1)
+  (['generala', 'rummy', 'chinchon', 'domino'] as GameId[]).every(
+    (g) => (f.champion.byGame[g] ?? 0) >= 1,
+  )
 const walkover = (f: ChampionFacts) => !!f.runnerUp && f.runnerUp.behind >= 6
 const photo = (f: ChampionFacts) => !!f.runnerUp && f.runnerUp.behind <= 2
 const efficient = (f: ChampionFacts) => f.champion.played >= 6 && f.rate >= 0.65
@@ -138,8 +143,18 @@ const LINES: Line[] = [
     when: carried('chinchon'),
   },
   {
+    title: 'EL DE LAS FICHAS',
+    note: (f) => `${f.champion.byGame.domino} dominós. Cuenta lo que le queda a cada uno.`,
+    when: carried('domino'),
+  },
+  {
+    title: 'NO SE LE ESCAPA UNA',
+    note: () => 'Sabe qué ficha falta y quién la tiene. Así cualquiera.',
+    when: carried('domino', 0.7),
+  },
+  {
     title: 'GANA EN TODAS',
-    note: () => 'Dados, cartas y paciencia. No hay por dónde agarrarlo.',
+    note: () => 'Dados, cartas, fichas y paciencia. No hay por dónde agarrarlo.',
     when: spread,
   },
 

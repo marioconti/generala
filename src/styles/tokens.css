@@ -96,6 +96,25 @@
   --accent-ink: #3d2e12;
 }
 
+/*
+ * Dominó — billiard green over dark walnut. The darkest table of the four, and
+ * deliberately: the tiles are ivory, and ivory needs something to sit on. Its
+ * green is the one hue the other three left free — generala's sage and
+ * chinchón's moss both lean yellow, rummy's eucalyptus leans blue, and this
+ * sits between them where neither of its neighbours is.
+ */
+[data-game='domino'] {
+  --wood-deep: #382a20;
+  --wood: #574234;
+  --wood-lit: #745b47;
+  --mat-lit: #79b487;
+  --mat: #5b9a6d;
+  --mat-deep: #3d7351;
+  --accent: #e3c07f;
+  --accent-deep: #bb9450;
+  --accent-ink: #38290f;
+}
+
 /* Home — the table before anyone sits down. */
 [data-game='home'] {
   --wood-deep: #4a3626;

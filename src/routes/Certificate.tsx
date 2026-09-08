@@ -4,6 +4,7 @@ import { playedOn } from '../components/ResultCard'
 import { Surface } from '../components/Surface'
 import {
   CHAMPION_THRESHOLD,
+  GAME_NAMES,
   getChampion,
   getHistory,
   getNemesis,
@@ -60,7 +61,7 @@ export function Certificate() {
           <p className="empty-note">
             El certificado se emite al llegar a <strong>{CHAMPION_THRESHOLD} puntos</strong>.
             <br />
-            Una generala vale 1, un chinchón 3, un rummy 5.
+            Una generala y un dominó valen 1, un chinchón 3, un rummy 5.
             <br />
             Sigan jugando.
           </p>
@@ -121,11 +122,15 @@ export function Certificate() {
             </div>
 
             <div className="cert__breakdown">
-              {(['generala', 'rummy', 'chinchon'] as const)
+              {/* Truco is left out on purpose: it can no longer be played, and a
+                  diploma is not the place to advertise a door that is gone. The
+                  names come from GAME_NAMES rather than the ids so the accents
+                  are right without a lookup table per screen. */}
+              {(['generala', 'rummy', 'chinchon', 'domino'] as const)
                 .filter((g) => champion.byGame[g] > 0)
                 .map((g) => (
                   <span key={g} className="cert__tag">
-                    {g === 'chinchon' ? 'chinchón' : g} · {champion.byGame[g]}
+                    {GAME_NAMES[g].toLowerCase()} · {champion.byGame[g]}
                   </span>
                 ))}
             </div>

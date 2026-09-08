@@ -38,6 +38,7 @@ export function TallyResult({ variant }: { variant: TallyVariant }) {
       rest[0]?.player.name ?? '',
       game.recordId,
     ),
+    game: variant,
     margin,
     winner: winners[0].player.name,
     loser: rest[0]?.player.name ?? '',

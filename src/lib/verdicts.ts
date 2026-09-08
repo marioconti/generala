@@ -17,17 +17,29 @@
  * being the verdict of that game.
  */
 
+import type { GameId } from './history'
 import type { HistoryFacts } from './verdict-facts'
 
 export type Band = 'tied' | 'blowout' | 'comfortable' | 'close' | 'photo'
 
 export interface VerdictContext extends HistoryFacts {
+  /**
+   * Which game this card is closing.
+   *
+   * Added for dominó, and it is the honest way to do what `generalas === null`
+   * was quietly being used for. It exists so a line can be about the thing on
+   * the table — tiles, dice, cards — and not fire in a game that has none of
+   * it. The general pool stays general: this only opens the *_EXTRA lines, the
+   * ones that had to qualify anyway.
+   */
+  game: GameId
   /** Always positive: the gap between first and second, whatever the game. */
   margin: number
   /**
    * The two totals as they appear on the sheet. Only compare them in a line
-   * gated to generala: chinchón and rummy are won by the LOWEST, so "no llegó
-   * ni a la mitad" is backwards there.
+   * gated to a game the comparison holds in — generala and dominó, where the
+   * winner's number is the bigger one. In chinchón and rummy the LOWEST wins,
+   * so "no llegó ni a la mitad" is backwards there.
    */
   winnerScore: number
   loserScore: number
@@ -70,6 +82,9 @@ interface Line {
  * chance of a line that fits any game at all.
  */
 const CONDITIONAL_WEIGHT = 3
+
+/** Played with tiles, so a line may talk about them. */
+const domino = (c: VerdictContext) => c.game === 'domino'
 
 const scratchedAtLeast = (n: number) => (c: VerdictContext) =>
   c.scratched !== null && c.scratched >= n
@@ -481,6 +496,11 @@ const TIED: Line[] = [
 
 const BLOWOUT_EXTRA: Line[] = [
   {
+    verdict: 'SE LLEVÓ LA MESA',
+    note: (c) => `${c.margin} de diferencia. ${c.loser} terminó contando fichas.`,
+    when: domino,
+  },
+  {
     verdict: 'Y ENCIMA GENERALA',
     note: (c) => `${c.margin} de diferencia y encima se dio el gusto. Insoportable.`,
     when: generala,
@@ -560,6 +580,11 @@ const BLOWOUT_EXTRA: Line[] = [
 
 const COMFORTABLE_EXTRA: Line[] = [
   {
+    verdict: 'SE ACORDABA DE TODAS',
+    note: (c) => `${c.margin} de ventaja. Que alguien revise esas fichas.`,
+    when: domino,
+  },
+  {
     verdict: 'LA GENERALA DECIDIÓ',
     note: (c) => `Ganó por ${c.margin} y ahí adentro hay 50 de una sola fila.`,
     when: generala,
@@ -619,6 +644,11 @@ const COMFORTABLE_EXTRA: Line[] = [
 
 const CLOSE_EXTRA: Line[] = [
   {
+    verdict: 'UNA MANO ALCANZABA',
+    note: (c) => `${c.margin} de diferencia. Una mano al revés y era otra historia.`,
+    when: domino,
+  },
+  {
     verdict: 'GANÓ PERO NO SE LA CREA',
     note: (c) => `${c.margin} de diferencia. Con eso no alcanza para hablar hasta la próxima.`,
   },
@@ -670,6 +700,11 @@ const CLOSE_EXTRA: Line[] = [
 ]
 
 const PHOTO_EXTRA: Line[] = [
+  {
+    verdict: 'POR UNA FICHA',
+    note: (c) => `${c.winnerScore} a ${c.loserScore}. Contá de nuevo si querés.`,
+    when: domino,
+  },
   {
     verdict: 'POR ESO NO SE HABLA',
     note: (c) => `${c.margin} de diferencia. Con eso no se le habla a nadie.`,

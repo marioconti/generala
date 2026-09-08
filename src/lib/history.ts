@@ -1,12 +1,13 @@
 import { useSyncExternalStore } from 'react'
 import { makeId, read, write } from './storage'
 
-export type GameId = 'generala' | 'rummy' | 'chinchon' | 'truco'
+export type GameId = 'generala' | 'rummy' | 'chinchon' | 'domino' | 'truco'
 
 export const GAME_NAMES: Record<GameId, string> = {
   generala: 'Generala',
   rummy: 'Rummy',
   chinchon: 'Chinchón',
+  domino: 'Dominó',
   truco: 'Truco',
 }
 
@@ -31,11 +32,18 @@ export const CHAMPION_THRESHOLD = 15
  * Set by the table: rummy 5 and generala 1 on 2026-09-06, chinchón 3 on
  * 2026-09-07. Truco is no longer playable and its weight only still exists so
  * that games already on record keep scoring.
+ *
+ * DOMINÓ IS AT 1 BECAUSE NOBODY HAS SAID WHAT IT SHOULD BE — the same reason
+ * chinchón sat at 1 until the table decided. A dominó to 100 is four or five
+ * hands, which puts it near a generala rather than near a rummy, so 1 is the
+ * honest placeholder; picking anything else here would be inventing the
+ * standings. Change this line when the table says a number.
  */
 export const WIN_VALUE: Record<GameId, number> = {
   generala: 1,
   rummy: 5,
   chinchon: 3,
+  domino: 1,
   truco: 1,
 }
 
@@ -236,7 +244,7 @@ export function getStandings(): Standing[] {
           points: 0,
           wins: 0,
           played: 0,
-          byGame: { generala: 0, rummy: 0, chinchon: 0, truco: 0 },
+          byGame: { generala: 0, rummy: 0, chinchon: 0, domino: 0, truco: 0 },
         } satisfies Standing)
 
       // Keep the most recent spelling of the name.

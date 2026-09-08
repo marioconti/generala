@@ -29,6 +29,7 @@ export function GeneralaResult() {
     // Everything the history knows about these two. Excludes this game, which
     // is already filed by the time the card renders.
     ...historyFactsOf('generala', champion.name, runnerUp?.name ?? '', game.recordId),
+    game: 'generala',
     margin,
     winner: champion.name,
     loser: runnerUp?.name ?? '',

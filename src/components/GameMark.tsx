@@ -1,5 +1,5 @@
 interface Props {
-  game: 'generala' | 'rummy' | 'chinchon'
+  game: 'generala' | 'rummy' | 'chinchon' | 'domino'
   size?: number
 }
 
@@ -14,7 +14,8 @@ interface Props {
  * it was the smallest possible answer to what the game is.
  *
  * Each door now shows what is actually on the table for that game: the shaker
- * and the dice, a hand of cards, cards with the chips that count to a hundred.
+ * and the dice, a hand of cards, cards with the chips that count to a hundred,
+ * two tiles laid across each other.
  *
  * SIZE IS THE REASON THIS WORKS AT ALL. The old marks were drawn at 34px, and
  * a tipped shaker with two dice tumbling out of it is a smudge at 34px — the
@@ -128,6 +129,39 @@ export function GameMark({ game, size = 68 }: Props) {
             <ellipse cx="33" cy="34.5" rx="8.5" ry="3.1" {...stroke} />
             <ellipse cx="33" cy="30.5" rx="8.5" ry="3.1" {...solid} />
             <ellipse cx="33" cy="30.5" rx="8.5" ry="3.1" {...stroke} />
+          </g>
+        </>
+      )}
+
+      {game === 'domino' && (
+        <>
+          {/*
+            THE TWO TILES CROSS. Drawn as a fan of two, the way the chinchón
+            mark steps two cards, this door would have been the card door with
+            a line through it — same silhouette, same overlap, at 68px the
+            difference would come down to a stroke. Dominoes are laid at right
+            angles to each other and cards never are, so the crossing IS the
+            drawing: one tile flat, one standing on it.
+
+            The back tile carries its divider and no pips. It is half covered,
+            and pips it only shows half of read as dirt on the felt.
+          */}
+          <g transform="rotate(6 23 34)">
+            <rect x="9.5" y="26.5" width="27" height="15" rx="3.6" {...solid} />
+            <rect x="9.5" y="26.5" width="27" height="15" rx="3.6" {...stroke} />
+            <path d="M23 28.5 V39.5" {...stroke} />
+          </g>
+
+          {/* The front tile is the readable one: a two over a three. */}
+          <g transform="rotate(-10 30 20)">
+            <rect x="22" y="6.5" width="16" height="27" rx="3.6" {...solid} />
+            <rect x="22" y="6.5" width="16" height="27" rx="3.6" {...stroke} />
+            <path d="M23.8 20 H36.2" {...stroke} />
+            <circle cx="27" cy="10.8" r="1.35" fill="currentColor" />
+            <circle cx="33" cy="16" r="1.35" fill="currentColor" />
+            <circle cx="27" cy="23.5" r="1.35" fill="currentColor" />
+            <circle cx="30" cy="26.75" r="1.35" fill="currentColor" />
+            <circle cx="33" cy="30" r="1.35" fill="currentColor" />
           </g>
         </>
       )}

@@ -42,15 +42,18 @@ import type { GameId } from './history'
  * Roughly a tenth of what a finished game is worth, which is what keeps the
  * early rows quiet.
  *
- * ⚠️ Only generala is measured. The other three are scaled from it by what a
- * full game is worth (30 for truco, 100 for the hand games) and have NOT been
- * checked against real play.
+ * ⚠️ Only generala is measured. The others are scaled from it by what a full
+ * game is worth (30 for truco, 100 for the hand games) and have NOT been
+ * checked against real play. In practice only generala ever reads this — it is
+ * the only game that draws a face beside a total — so the rest exist to keep
+ * the record total rather than because they were tuned.
  */
 const FLOOR: Record<GameId, number> = {
   generala: 20,
   truco: 3,
   rummy: 10,
   chinchon: 10,
+  domino: 10,
 }
 
 /**

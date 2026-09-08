@@ -38,7 +38,7 @@ export function TallySetup({ variant }: { variant: TallyVariant }) {
           <div className="card__frame" />
           <div className="card__body">
             <div className="field-label">¿QUIÉNES JUEGAN?</div>
-            <PlayerNames names={names} onChange={setNames} min={2} max={6} />
+            <PlayerNames names={names} onChange={setNames} min={2} max={preset.maxPlayers} />
           </div>
         </div>
 

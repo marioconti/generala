@@ -16,10 +16,11 @@ function isTally(value: unknown): boolean {
   return !!g && Array.isArray(g.players) && g.players.length > 0 && Array.isArray(g.rounds)
 }
 
-// Rummy and Chinchón are separate tables — a game of one does not disturb the other.
+// One table each — a game of one does not disturb the others.
 const stores: Record<TallyVariant, ReturnType<typeof createStore<TallyGame>>> = {
   rummy: createStore<TallyGame>('anotador.rummy.v1', isTally),
   chinchon: createStore<TallyGame>('anotador.chinchon.v1', isTally),
+  domino: createStore<TallyGame>('anotador.domino.v1', isTally),
 }
 
 export function useTally(variant: TallyVariant) {

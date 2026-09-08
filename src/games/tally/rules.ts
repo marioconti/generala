@@ -1,24 +1,32 @@
 import type { GameId } from '../../lib/history'
 
 /**
- * The scorer behind Rummy and Chinchón.
+ * The scorer behind Rummy, Chinchón and Dominó.
  *
- * Both are hand-by-hand accumulators: each round every player takes a score,
- * it adds to their running total, and the game ends when someone crosses the
- * target. The only things that differ are the target and whether the highest
- * or the lowest total wins — so both are the same engine with different knobs.
+ * All three are hand-by-hand accumulators: each round every player takes a
+ * score, it adds to their running total, and the game ends when someone
+ * crosses the target. The only things that differ are the target and whether
+ * the highest or the lowest total wins — so they are the same engine with
+ * different knobs.
  *
- * Both are played to 100 and the LOWEST total wins: crossing 100 ends the game
- * and the player who crossed it has lost. In Chinchón the player who closes the
- * hand subtracts 10, so negative hands are normal and the keypad keeps a sign
- * key.
+ * Rummy and Chinchón are played to 100 and the LOWEST total wins: crossing 100
+ * ends the game and the player who crossed it has lost. In Chinchón the player
+ * who closes the hand subtracts 10, so negative hands are normal and the keypad
+ * keeps a sign key.
+ *
+ * DOMINÓ RUNS THE OTHER WAY, and it is the first game here that does: it is
+ * played to 100 and the HIGHEST total wins, so reaching 100 is winning rather
+ * than losing. `winnerIs` was already in this file for exactly that case and
+ * had never been anything but 'lowest'; everything downstream — ranking,
+ * progress, the board's "se juega a" label — was written to read it, so the
+ * direction is a knob and not a branch.
  *
  * These are the house rules as played at this table, and they are fixed rather
  * than configurable — asked and answered, 2026-08-23. The published Chinchón
  * rules agree: https://www.ludoteka.com/games/chinchon/rules
  */
 
-export type TallyVariant = Extract<GameId, 'rummy' | 'chinchon'>
+export type TallyVariant = Extract<GameId, 'rummy' | 'chinchon' | 'domino'>
 export type WinnerIs = 'lowest' | 'highest'
 
 export interface TallyPlayer {
@@ -59,6 +67,13 @@ export interface VariantPreset {
   winnerIs: WinnerIs
   /** Shown under the setup toggles so the rule is visible, not assumed. */
   note: string
+  /**
+   * How many people can sit down. Six for the card games, because a sheet
+   * holds six columns and a deck does not care. FOUR FOR DOMINÓ, AND THAT ONE
+   * IS PHYSICS: a double-six set is 28 tiles dealt seven at a time, so a fifth
+   * player has nothing to pick up.
+   */
+  maxPlayers: number
 }
 
 export const PRESETS: Record<TallyVariant, VariantPreset> = {
@@ -67,12 +82,21 @@ export const PRESETS: Record<TallyVariant, VariantPreset> = {
     target: 100,
     winnerIs: 'lowest',
     note: 'Se juega a 100. El que pasa, pierde: gana el que menos suma. El que corta la mano resta 10.',
+    maxPlayers: 6,
   },
   rummy: {
     label: 'Rummy',
     target: 100,
     winnerIs: 'lowest',
     note: 'Se juega a 100. El que pasa, pierde: gana el que menos suma.',
+    maxPlayers: 6,
+  },
+  domino: {
+    label: 'Dominó',
+    target: 100,
+    winnerIs: 'highest',
+    note: 'Se juega a 100 y gana el primero que llega. Doble seis, 7 fichas cada uno: el que se queda sin fichas se lleva lo que les quedó a los demás, y si se tranca la mano es del que menos suma. Sale el que ganó la mano anterior.',
+    maxPlayers: 4,
   },
 }
 
@@ -96,7 +120,9 @@ export function totals(game: TallyGame): Record<string, number> {
 /**
  * The game is over when someone reaches the target. Note this holds whichever
  * way the game is won: in Chinchón crossing 100 ends it and that player has
- * almost certainly lost.
+ * almost certainly lost, in Dominó crossing 100 ends it and that player has
+ * won. Same test, opposite meaning — which is why the direction lives in
+ * `winnerIs` and not here.
  */
 export function isComplete(game: TallyGame): boolean {
   if (game.target === null || game.rounds.length === 0) return false
@@ -124,7 +150,12 @@ export function winnerNames(game: TallyGame): string[] {
   return table.filter((r) => r.total === best).map((r) => r.player.name)
 }
 
-/** 0 to 1, how close the closest player is to ending the game. */
+/**
+ * 0 to 1, how close the closest player is to ending the game. The highest
+ * total is the right one to measure in every direction: in Chinchón it is
+ * whoever is about to lose it, in Dominó whoever is about to win it, and
+ * either way it is the number the bar is tracking.
+ */
 export function progress(game: TallyGame): number {
   if (game.target === null) return 0
   const highest = Math.max(0, ...Object.values(totals(game)))
@@ -137,6 +168,13 @@ export function progress(game: TallyGame): number {
  *
  * `roundIndex` is 0-based, so `manoAt(game, game.rounds.length)` is the hand
  * about to be played — the one the board needs to point at.
+ *
+ * DOMINÓ DOES NOT USE THIS, and the board hides the marker there. In dominó
+ * the lead is not a rotation: the first hand belongs to whoever holds the
+ * double six and every hand after that to whoever won the last one. Neither is
+ * a seat count, so a strip announcing "EMPIEZA Juan" on that screen would be
+ * confidently wrong four hands out of five. The rule is stated in the setup
+ * note instead, where it is true.
  */
 export function manoAt(game: TallyGame, roundIndex: number): TallyPlayer {
   const seats = game.players.length

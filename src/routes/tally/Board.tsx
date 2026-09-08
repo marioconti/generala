@@ -28,6 +28,13 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
   const running = totals(game)
   const leader = ranking(game)[0]
   const pct = progress(game)
+  /*
+   * Dominó has a lead but not a rotation: the first hand is the double six's
+   * and every one after it belongs to whoever won the last, neither of which
+   * this app can count. So the strip is not shown there rather than shown
+   * wrong — see the note on manoAt. The other two rotate a seat per hand.
+   */
+  const showsMano = variant !== 'domino'
   const mano = nextMano(game)
 
   return (
@@ -50,7 +57,9 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
           {game.players.map((player) => (
             <div
               key={player.id}
-              className={`tally-head__player${player.id === mano.id ? ' tally-head__player--mano' : ''}`}
+              className={`tally-head__player${
+                showsMano && player.id === mano.id ? ' tally-head__player--mano' : ''
+              }`}
             >
               <Chip chip={player.chip} initial={player.name.charAt(0)} size={26} />
               <span className="tally-head__name">{player.name.toUpperCase()}</span>
@@ -116,19 +125,21 @@ export function TallyBoard({ variant }: { variant: TallyVariant }) {
         "quién es mano" here had no clear answer. A verb cannot be mistaken for
         a row number.
       */}
-      <button type="button" className="mano-strip" onClick={() => setPickingMano(true)}>
-        <span className="mano-strip__label">EMPIEZA</span>
-        <Chip chip={mano.chip} initial={mano.name.charAt(0)} size={24} />
-        <span className="mano-strip__name">{mano.name.toUpperCase()}</span>
-        <span className="mano-strip__change">cambiar</span>
-      </button>
+      {showsMano && (
+        <button type="button" className="mano-strip" onClick={() => setPickingMano(true)}>
+          <span className="mano-strip__label">EMPIEZA</span>
+          <Chip chip={mano.chip} initial={mano.name.charAt(0)} size={24} />
+          <span className="mano-strip__name">{mano.name.toUpperCase()}</span>
+          <span className="mano-strip__change">cambiar</span>
+        </button>
+      )}
 
       <button type="button" className="big-btn" onClick={() => setEditing('new')}>
         <Icon name="plus" size={20} />
         MANO
       </button>
 
-      {pickingMano && (
+      {showsMano && pickingMano && (
         <Sheet label="Quién empieza esta mano" onClose={() => setPickingMano(false)}>
           <div className="mano-pick">
             <p className="mano-pick__title">¿Quién empieza esta mano?</p>

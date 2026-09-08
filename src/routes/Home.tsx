@@ -13,7 +13,7 @@ import {
 } from '../lib/history'
 
 interface Door {
-  id: 'generala' | 'rummy' | 'chinchon'
+  id: 'generala' | 'rummy' | 'chinchon' | 'domino'
   to: string
   name: string
   blurb: string
@@ -23,17 +23,20 @@ const DOORS: Door[] = [
   { id: 'generala', to: '/generala', name: 'Generala', blurb: '5 dados · 11 juegos' },
   { id: 'rummy', to: '/rummy', name: 'Rummy', blurb: 'mano a mano' },
   { id: 'chinchon', to: '/chinchon', name: 'Chinchón', blurb: 'a 100 · gana el menor' },
+  { id: 'domino', to: '/domino', name: 'Dominó', blurb: 'doble seis · gana el mayor' },
 ]
 
 export function Home() {
   const generala = useGenerala()
   const rummy = useTally('rummy')
   const chinchon = useTally('chinchon')
+  const domino = useTally('domino')
 
   const inProgress: Partial<Record<GameId, boolean>> = {
     generala: !!generala.game && !generala.game.finishedAt && generala.game.history.length > 0,
     rummy: !!rummy.game && !rummy.game.finishedAt && rummy.game.rounds.length > 0,
     chinchon: !!chinchon.game && !chinchon.game.finishedAt && chinchon.game.rounds.length > 0,
+    domino: !!domino.game && !domino.game.finishedAt && domino.game.rounds.length > 0,
   }
 
   useHistoryVersion()

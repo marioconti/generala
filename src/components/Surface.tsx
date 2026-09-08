@@ -94,6 +94,24 @@ const PATTERNS: Record<SurfaceId, { size: number; draw: ReactNode }> = {
     size: 48,
     draw: <circle cx="24" cy="24" r="11" fill="none" stroke={LINE} strokeWidth="1.5" />,
   },
+  /*
+   * A tile, tipped. The only motif with a straight edge in it, which is the
+   * point — dots, leaves and rings are all the same soft shape and a fourth
+   * one would have read as a repeat. The corners are as round as the tile can
+   * carry and it sits at an angle, so it still reads as stitching rather than
+   * as geometry printed on cloth.
+   */
+  domino: {
+    size: 52,
+    draw: (
+      <g transform="rotate(-18 26 26)">
+        <rect x="19" y="14" width="14" height="24" rx="4" fill="none" stroke={LINE} strokeWidth="1.5" />
+        <path d="M20.5 26 H31.5" stroke={LINE} strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="26" cy="20" r="1.6" fill={LINE} />
+        <circle cx="26" cy="32" r="1.6" fill={LINE} />
+      </g>
+    ),
+  },
   // Scattered dots for the menu.
   home: {
     size: 46,

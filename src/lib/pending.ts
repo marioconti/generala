@@ -23,13 +23,14 @@ export interface Pending {
  * The games left open on this phone, in the order the doors show them.
  *
  * There is one slot per game, so starting a new Rummy replaces whichever one
- * was open: this list never grows past four, and a game only leaves it by
- * being finished or abandoned from its own menu.
+ * was open: this list never grows past one per door, and a game only leaves it
+ * by being finished or abandoned from its own menu.
  */
 export function usePending(): Pending[] {
   const generala = useGenerala()
   const rummy = useTally('rummy')
   const chinchon = useTally('chinchon')
+  const domino = useTally('domino')
 
   const pending: Pending[] = []
 
@@ -52,10 +53,13 @@ export function usePending(): Pending[] {
   for (const [variant, table] of [
     ['rummy', rummy.game],
     ['chinchon', chinchon.game],
+    ['domino', domino.game],
   ] as const) {
     if (!table || table.finishedAt || table.rounds.length === 0) continue
     const rank = tallyRanking(table)
-    // These are won by the LOWEST total, and ranking() already sorts that way.
+    // ranking() already sorts each game its own way — lowest first in rummy and
+    // chinchón, highest first in dominó — so the leader is rank[0] in all three
+    // and this line does not have to know which.
     const ahead = rank[0].total !== rank[1]?.total
     pending.push({
       game: variant,

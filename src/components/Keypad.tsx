@@ -5,6 +5,11 @@ interface Props {
   onChange: (value: string) => void
   /** Rummy and Chinchón both have hands that subtract, so the sign key stays. */
   allowNegative?: boolean
+  /**
+   * Greyed out and inert. Dominó asks who won before it asks for how much, and
+   * a live keypad above an unanswered question invites taps that go nowhere.
+   */
+  disabled?: boolean
 }
 
 /**
@@ -14,7 +19,7 @@ interface Props {
  * exactly where the sheet lives, and it takes a second to appear and dismiss
  * on every single hand. This is always there and never covers anything.
  */
-export function Keypad({ value, onChange, allowNegative = true }: Props) {
+export function Keypad({ value, onChange, allowNegative = true, disabled = false }: Props) {
   const press = (digit: string) => {
     const negative = value.startsWith('-')
     const digits = negative ? value.slice(1) : value
@@ -36,7 +41,13 @@ export function Keypad({ value, onChange, allowNegative = true }: Props) {
   return (
     <div className="keypad">
       {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
-        <button key={digit} type="button" className="keypad__key" onClick={() => press(digit)}>
+        <button
+          key={digit}
+          type="button"
+          className="keypad__key"
+          disabled={disabled}
+          onClick={() => press(digit)}
+        >
           {digit}
         </button>
       ))}
@@ -44,17 +55,18 @@ export function Keypad({ value, onChange, allowNegative = true }: Props) {
         type="button"
         className="keypad__key keypad__key--soft"
         onClick={toggleSign}
-        disabled={!allowNegative}
+        disabled={disabled || !allowNegative}
         aria-label="Cambiar signo"
       >
         ±
       </button>
-      <button type="button" className="keypad__key" onClick={() => press('0')}>
+      <button type="button" className="keypad__key" disabled={disabled} onClick={() => press('0')}>
         0
       </button>
       <button
         type="button"
         className="keypad__key keypad__key--soft"
+        disabled={disabled}
         onClick={backspace}
         aria-label="Borrar"
       >

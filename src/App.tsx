@@ -63,6 +63,10 @@ export function App() {
         <Route path="/chinchon/partida" element={<TallyBoard variant="chinchon" />} />
         <Route path="/chinchon/resultado" element={<TallyResult variant="chinchon" />} />
 
+        <Route path="/domino" element={<TallySetup variant="domino" />} />
+        <Route path="/domino/partida" element={<TallyBoard variant="domino" />} />
+        <Route path="/domino/resultado" element={<TallyResult variant="domino" />} />
+
 
         <Route path="/historial" element={<History />} />
         <Route path="/certificado" element={<Certificate />} />
